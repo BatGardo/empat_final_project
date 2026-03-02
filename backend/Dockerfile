@@ -14,13 +14,18 @@ COPY . /var/www/html
 
 # Access
 RUN chown -R www-data:www-data /var/www/html \
-    && a2enmod rewrite
+    && a2enmod rewrite \
+    && chmod -R 755 /var/www/html/storage \
+    && chmod -R 755 /var/www/html/bootstrap/cache
 
 # Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Dependencies Laravel
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader \
+    && php artisan config:cache \
+    && php artisan route:cache \
+    && php artisan view:cache
 
 # Expose port
 EXPOSE 80
