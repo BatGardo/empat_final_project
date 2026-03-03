@@ -1,4 +1,4 @@
-FROM php:8.4-apache
+FROM php:8.4-cli
 
 # Dependencies
 RUN apt-get update && apt-get install -y \
@@ -9,31 +9,21 @@ RUN apt-get update && apt-get install -y \
     curl \
     libpq-dev
 
-# PHP
+# PHP extensions
 RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql zip
 
-# Laravel
+# Work directory
 WORKDIR /var/www/html
 COPY . .
 
-# Permissions and Apache
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache \
-    && a2enmod rewrite \
-    && sed -i 's#/var/www/html#/var/www/html/public#g' /etc/apache2/sites-available/000-default.conf
-
-# Composer
+# Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Laravel dependencies and cache
-RUN composer install --no-dev --optimize-autoloader \
-    && php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
+# Install Laravel deps
+RUN composer install --no-dev --optimize-autoloader
 
-# Expose port
-EXPOSE 80
+# Permissions
+RUN chmod -R 777 storage bootstrap/cache
 
-# run Apache
-CMD ["apache2-foreground"]
+# Start Laravel for Render
+CMD php artisan serve --host=0.0.0.0 --port=$PORT
