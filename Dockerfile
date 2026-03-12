@@ -7,7 +7,7 @@ COPY frontend/ .
 RUN npm run build
 
 # Backend
-FROM php:8.2-fpm
+FROM php:8.4-fpm
 WORKDIR /var/www
 
 # PHP
@@ -22,7 +22,8 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY backend/ .
 
 # Dependencies
-RUN composer install --no-dev --optimize-autoloader --prefer-dist --no-interaction
+COPY backend/composer.json backend/composer.lock ./
+RUN composer install --optimize-autoloader --prefer-dist --no-interaction
 
 # Copy React build to public
 COPY --from=frontend-build /app/dist ./public
