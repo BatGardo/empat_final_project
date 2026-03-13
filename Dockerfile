@@ -18,8 +18,12 @@ RUN apt-get update && apt-get install -y \
 # Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copy Laravel
+# Laravel
 COPY backend/ .
+
+# Create necessary folders for Laravel
+RUN mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache
 
 # Dependencies
 COPY backend/composer.json backend/composer.lock ./
