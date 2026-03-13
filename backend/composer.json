@@ -9,6 +9,7 @@
     ],
     "license": "MIT",
     "require": {
+        "dedoc/scramble": "^0.13.14",
         "php": "^8.4",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.3",
