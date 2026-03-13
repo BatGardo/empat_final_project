@@ -27,7 +27,7 @@ RUN mkdir -p storage/framework/cache/data storage/framework/sessions storage/fra
 
 # Dependencies
 COPY backend/composer.json backend/composer.lock ./
-RUN composer install --dev --optimize-autoloader --prefer-dist --no-interaction
+RUN composer install --optimize-autoloader --prefer-dist --no-interaction
 
 # Copy React build to public
 COPY --from=frontend-build /app/dist ./public
@@ -37,7 +37,4 @@ RUN chown -R www-data:www-data /var/www
 
 # Run Laravel + migrations
 ENV PORT 10000
-CMD php artisan migrate --force \
-    && php artisan scramble:analyze \
-    && php artisan scramble:export \
-    && php artisan serve --host=0.0.0.0 --port=$PORT
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT

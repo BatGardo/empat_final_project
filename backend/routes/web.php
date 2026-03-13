@@ -13,4 +13,4 @@ Route::get('/health', function() {
 // All routes, except /api/* and /health, serve React
 Route::get('/{any}', function () {
     return file_get_contents(public_path('index.html'));
-})->where('any', '.*');
+})->where('any', '^(?!api|health).*$');
