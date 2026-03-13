@@ -29,12 +29,6 @@ RUN mkdir -p storage/framework/cache/data storage/framework/sessions storage/fra
 COPY backend/composer.json backend/composer.lock ./
 RUN composer install --optimize-autoloader --prefer-dist --no-interaction
 
-RUN php artisan config:clear \
- && php artisan route:clear \
- && php artisan cache:clear \
- && php artisan view:clear
-
-
 # Copy React build to public
 COPY --from=frontend-build /app/dist ./public
 
