@@ -20,7 +20,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Dependencies
 COPY backend/composer.json backend/composer.lock ./
-RUN composer install --optimize-autoloader --prefer-dist --no-interaction
+RUN composer install --optimize-autoloader --prefer-dist --no-interaction --dev
 
 # Copy Laravel
 COPY backend/ .
