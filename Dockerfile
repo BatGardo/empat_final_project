@@ -27,7 +27,7 @@ RUN mkdir -p storage/framework/cache/data storage/framework/sessions storage/fra
 
 # Dependencies
 COPY backend/composer.json backend/composer.lock ./
-RUN composer install --no-dev=false --optimize-autoloader --prefer-dist --no-interaction
+RUN composer install --optimize-autoloader --prefer-dist --no-interaction
 
 RUN php artisan config:clear \
  && php artisan route:clear \
