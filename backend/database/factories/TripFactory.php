@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends Factory<Trip>
  */
-namespace Database\Factories;
-
 class TripFactory extends Factory
 {
     public function definition(): array

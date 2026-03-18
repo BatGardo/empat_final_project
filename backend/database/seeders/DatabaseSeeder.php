@@ -17,11 +17,14 @@ class DatabaseSeeder extends Seeder
     {
         //User::factory(5)->create();
 
-        User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'password' => bcrypt('password123'),
-            'default_timezone' => 'Europe/London',
-        ]);
+        User::firstOrCreate(
+            ['email' => 'admin@example.com'], // уникальный ключ
+            [
+                'name' => 'Admin User',
+                'password' => bcrypt('password123'),
+                'default_timezone' => 'Europe/London',
+            ]
+        );
+        $this->call(TestUserTripsSeeder::class);
     }
 }

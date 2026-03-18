@@ -41,4 +41,9 @@ class Trip extends Model
     {
         return $this->hasMany(Notification::class);
     }
+
+    public function plans(): HasMany
+    {
+        return $this->hasMany(TripPlan::class);
+    }
 }
