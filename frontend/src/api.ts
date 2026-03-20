@@ -30,8 +30,6 @@ export interface DashboardData {
   deadlines: unknown[];
 }
 
-// Auth
-
 async function login(): Promise<string> {
   const res = await fetch(`${API_URL}/auth/login`, {
     method: 'POST',
@@ -61,7 +59,6 @@ async function authFetch(url: string, options: RequestInit = {}): Promise<Respon
       ...options.headers,
     },
   });
-  // If 401 — token expired, re-login and retry
   if (res.status === 401) {
     localStorage.removeItem('auth_token');
     const newToken = await login();
@@ -76,8 +73,6 @@ async function authFetch(url: string, options: RequestInit = {}): Promise<Respon
   }
   return res;
 }
-
-// Trips
 
 export async function getTrip(tripId: string): Promise<Trip> {
   const res = await authFetch(`${API_URL}/trips/${tripId}`);
@@ -104,7 +99,49 @@ export async function getTripMembers(tripId: string): Promise<Member[]> {
   return res.json();
 }
 
-// Dashboard
+export interface Expense {
+  id: string;
+  trip_id: string;
+  title: string;
+  total_amount: string;
+  currency: string;
+  date: string;
+  paid_by: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getTripExpenses(tripId: string): Promise<Expense[]> {
+  const res = await authFetch(`${API_URL}/trips/${tripId}/expenses`);
+  if (!res.ok) throw new Error('Failed to fetch expenses');
+  return res.json();
+}
+
+export async function createExpense(tripId: string, data: { title: string; total_amount: number; currency: string; paid_by: number; splits: number[] }): Promise<Expense> {
+  const res = await authFetch(`${API_URL}/trips/${tripId}/expenses`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const error = await res.text();
+    console.error('Create expense error:', res.status, error);
+    throw new Error('Failed to create expense');
+  }
+  return res.json();
+}
+
+export async function createTrip(data: { title: string; destination: string; start_date: string; end_date: string; budget_amount: number; budget_currency: string }): Promise<Trip> {
+  const res = await authFetch(`${API_URL}/trips`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const error = await res.text();
+    console.error('Create trip error:', res.status, error);
+    throw new Error('Failed to create trip');
+  }
+  return res.json();
+}
 
 export async function getDashboard(): Promise<DashboardData> {
   const res = await authFetch(`${API_URL}/dashboard`);

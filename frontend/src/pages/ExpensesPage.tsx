@@ -1,62 +1,73 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
+import { getTrip, getTripExpenses, createExpense, type Trip, type Expense } from '../api';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
 const sidebarItems = [
   { label: 'Team', icon: '/icons/team.svg', path: 'team' },
+  { label: 'Travel Plan', icon: '/icons/travel-plan.svg', path: 'travel-plan' },
+  { label: 'Kanban Board', icon: '/icons/kanban-board.svg', path: 'kanban' },
   { label: 'Expenses', icon: '/icons/expenses.svg', path: 'expenses' },
 ];
 
 const CHART_COLORS = ['#3d3d5e', '#84DCC6', '#F1AAB9', '#7ab0d4', '#F0C040'];
 
-const expenseCategories = [
-  {
-    name: 'Tents',
-    total: 800,
-    items: [
-      { label: 'Tent rental', amount: 500 },
-      { label: 'Tent accessories', amount: 300 },
-    ],
-  },
-  {
-    name: 'Food',
-    total: 700,
-    items: [
-      { label: 'Groceries', amount: 450 },
-      { label: 'Restaurants', amount: 250 },
-    ],
-  },
-  {
-    name: 'Transport',
-    total: 300,
-    items: [
-      { label: 'Fuel', amount: 180 },
-      { label: 'Parking', amount: 120 },
-    ],
-  },
-];
-
 const ExpensesPage = () => {
   const { tripId } = useParams<{ tripId: string }>();
-  const [openCategory, setOpenCategory] = useState<string | null>(null);
+  const [trip, setTrip] = useState<Trip | null>(null);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [newExpense, setNewExpense] = useState({ title: '', total_amount: 0, currency: 'USD', paid_by: 1, splits: [1] });
 
-  const chartData = expenseCategories.map((cat) => ({
-    name: cat.name,
-    value: cat.total,
+  useEffect(() => {
+    if (!tripId) return;
+    setLoading(true);
+    Promise.all([getTrip(tripId), getTripExpenses(tripId)])
+      .then(([tripData, expensesData]) => {
+        setTrip(tripData);
+        setExpenses(expensesData);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [tripId]);
+
+  const handleCreateExpense = async () => {
+    if (!tripId || !newExpense.title.trim() || !newExpense.total_amount) return;
+    try {
+      await createExpense(tripId, newExpense);
+      const updated = await getTripExpenses(tripId);
+      setExpenses(updated);
+      setShowForm(false);
+      setNewExpense({ title: '', total_amount: 0, currency: 'USD', paid_by: 1, splits: [1] });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const globalAmount = expenses.reduce((sum, e) => sum + parseFloat(e.total_amount), 0);
+
+  const chartData = expenses.map((e) => ({
+    name: e.title,
+    value: parseFloat(e.total_amount),
   }));
 
-  const toggleCategory = (name: string) => {
-    setOpenCategory(openCategory === name ? null : name);
-  };
+  if (loading) {
+    return (
+      <div className="flex min-h-[calc(100vh-57px)] items-center justify-center">
+        <p className="text-gray-500">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-[calc(100vh-57px)]">
       {/* Sidebar */}
       <aside className="w-60 border-r border-gray-200 bg-white px-4 py-6">
-        <NavLink to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900">
+        <NavLink to="/dashboard" className="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900">
           &lt; Back
         </NavLink>
-        <h2 className="mb-6 text-xl font-bold text-gray-900">Travel Name</h2>
+        <h2 className="mb-6 text-xl font-bold text-gray-900">{trip?.title || 'Travel Name'}</h2>
         <nav className="flex flex-col gap-1">
           {sidebarItems.map((item) => (
             <NavLink
@@ -102,65 +113,127 @@ const ExpensesPage = () => {
         <div className="mb-6 flex gap-4">
           <div className="flex flex-1 items-center justify-between rounded-xl bg-[#3d3d5e] px-6 py-3 font-semibold text-white">
             <span>Global Amount</span>
-            <span>50 000</span>
+            <span>{globalAmount.toFixed(2)}</span>
           </div>
-          <div className="flex flex-1 cursor-pointer items-center justify-between rounded-xl bg-[#3d3d5e] px-6 py-3 font-semibold text-white transition hover:bg-[#2f2f4a]">
+          <div
+            onClick={() => setShowForm(true)}
+            className="flex flex-1 cursor-pointer items-center justify-between rounded-xl bg-[#3d3d5e] px-6 py-3 font-semibold text-white transition hover:bg-[#2f2f4a]"
+          >
             <span>Add new expense</span>
             <span className="text-xl">+</span>
           </div>
         </div>
 
-        {/* Chart + Categories */}
+        {/* Chart + Expenses List */}
         <div className="flex gap-6">
           {/* Pie Chart */}
           <div className="flex h-64 w-64 items-center justify-center rounded-xl bg-white p-4 shadow-sm">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={0}
-                  outerRadius={90}
-                  dataKey="value"
-                  stroke="none"
-                >
-                  {chartData.map((_entry, index) => (
-                    <Cell key={index} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
+            {chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={0}
+                    outerRadius={90}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    {chartData.map((_entry, index) => (
+                      <Cell key={index} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-sm text-gray-400">No expenses yet</p>
+            )}
           </div>
 
-          {/* Expense Categories */}
+          {/* Expense Items */}
           <div className="flex-1 space-y-4">
-            {expenseCategories.map((cat) => (
-              <div key={cat.name}>
-                <p className="mb-1 text-sm font-medium text-gray-700">{cat.name}</p>
-                <button
-                  onClick={() => toggleCategory(cat.name)}
-                  className="flex w-full items-center justify-between rounded-xl bg-[#eeeef8] px-5 py-3 transition hover:bg-[#e4e4f0]"
-                >
-                  <span className="text-sm font-semibold text-gray-900">Total: {cat.total}</span>
-                  <span className={`text-gray-500 transition ${openCategory === cat.name ? 'rotate-180' : ''}`}>
-                    ⌄
-                  </span>
-                </button>
-                {openCategory === cat.name && (
-                  <div className="mt-2 space-y-2 rounded-xl bg-white px-5 py-3 shadow-sm">
-                    {cat.items.map((item) => (
-                      <div key={item.label} className="flex items-center justify-between text-sm text-gray-700">
-                        <span>{item.label}</span>
-                        <span className="font-medium">{item.amount}</span>
-                      </div>
-                    ))}
+            {expenses.length === 0 ? (
+              <p className="text-sm text-gray-400">No expenses yet</p>
+            ) : (
+              expenses.map((expense) => (
+                <div key={expense.id}>
+                  <p className="mb-1 text-sm font-medium text-gray-700">{expense.title}</p>
+                  <div className="flex items-center justify-between rounded-xl bg-[#eeeef8] px-5 py-3">
+                    <span className="text-sm font-semibold text-gray-900">
+                      Total: {expense.total_amount} {expense.currency}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {new Date(expense.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </span>
                   </div>
-                )}
-              </div>
-            ))}
+                </div>
+              ))
+            )}
           </div>
         </div>
+
+        {/* Create Expense Modal */}
+        {showForm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowForm(false)}>
+            <div className="w-[400px] rounded-2xl bg-white p-8" onClick={(e) => e.stopPropagation()}>
+              <h2 className="mb-6 text-xl font-bold text-gray-900">Add Expense</h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Title *</label>
+                  <input
+                    type="text"
+                    value={newExpense.title}
+                    onChange={(e) => setNewExpense({ ...newExpense, title: e.target.value })}
+                    placeholder="Dinner, Hotel..."
+                    autoFocus
+                    className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none focus:border-[#3d3d5e]"
+                  />
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <label className="mb-1 block text-sm font-medium text-gray-700">Amount *</label>
+                    <input
+                      type="number"
+                      value={newExpense.total_amount || ''}
+                      onChange={(e) => setNewExpense({ ...newExpense, total_amount: Number(e.target.value) })}
+                      placeholder="100"
+                      className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none focus:border-[#3d3d5e]"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="mb-1 block text-sm font-medium text-gray-700">Currency</label>
+                    <select
+                      value={newExpense.currency}
+                      onChange={(e) => setNewExpense({ ...newExpense, currency: e.target.value })}
+                      className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none focus:border-[#3d3d5e]"
+                    >
+                      <option value="USD">USD</option>
+                      <option value="EUR">EUR</option>
+                      <option value="UAH">UAH</option>
+                      <option value="GBP">GBP</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  onClick={() => setShowForm(false)}
+                  className="rounded-full border border-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCreateExpense}
+                  className="rounded-full bg-[#3d3d5e] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#2f2f4a]"
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Watermark */}
         <img src="/vehicles/Union.svg" alt="" className="fixed bottom-10 right-10 h-40 w-auto opacity-10 grayscale pointer-events-none" />
       </main>

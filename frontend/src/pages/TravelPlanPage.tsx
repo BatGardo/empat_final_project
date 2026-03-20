@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
+import { getTrip, type Trip } from '../api';
 
 const sidebarItems = [
   { label: 'Team', icon: '/icons/team.svg', path: 'team' },
@@ -25,6 +27,12 @@ const days: DayPlan[] = [
 
 const TravelPlanPage = () => {
   const { tripId } = useParams<{ tripId: string }>();
+  const [trip, setTrip] = useState<Trip | null>(null);
+
+  useEffect(() => {
+    if (!tripId) return;
+    getTrip(tripId).then(setTrip).catch(console.error);
+  }, [tripId]);
   return (
     <div className="flex min-h-[calc(100vh-57px)]">
       {/* Sidebar */}
@@ -32,7 +40,7 @@ const TravelPlanPage = () => {
         <NavLink to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900">
           &lt; Back
         </NavLink>
-        <h2 className="mb-6 text-xl font-bold text-gray-900">Travel Name</h2>
+        <h2 className="mb-6 text-xl font-bold text-gray-900">{trip?.title || 'Travel Name'}</h2>
         <nav className="flex flex-col gap-1">
           {sidebarItems.map((item) => (
             <NavLink
