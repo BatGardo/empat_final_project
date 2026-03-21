@@ -16,19 +16,19 @@ class DashboardController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        // last trips
+        // Last trips
         $trips = $user->trips()
             ->latest()
             ->limit(9)
             ->get();
 
-        // last notifications
+        // Last notifications
         $notifications = $user->notifications()
             ->latest()
             ->limit(6)
             ->get();
 
-        // nearest deadlines
+        // Nearest deadlines
         $deadlines = Task::whereHas('trip', function ($q) use ($user) {
             $q->whereHas('members', function ($q2) use ($user) {
                 $q2->where('user_id', $user->id);

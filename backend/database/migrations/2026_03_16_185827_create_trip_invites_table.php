@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('trip_invites', function (Blueprint $table) {
-            $table->uuid('id')->primary(); // UUID PK
+            $table->uuid('id')->primary();
             $table->uuid('trip_id');
             $table->uuid('token')->unique();
             $table->timestamp('expires_at');

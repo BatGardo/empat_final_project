@@ -32,7 +32,7 @@ class TaskController extends Controller
             'created_by' => $request->user()->id,
         ]);
 
-        // multiple assignees
+        // Multiple assignees
         if ($request->has('assignees')) {
             $task->assignees()->sync($request->assignees);
         }

@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
         //User::factory(5)->create();
 
         User::firstOrCreate(
-            ['email' => 'admin@example.com'], // уникальный ключ
+            ['email' => 'admin@example.com'],
             [
                 'name' => 'Admin User',
                 'password' => bcrypt('password123'),

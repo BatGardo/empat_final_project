@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\ProfileTrip\TripMemberController;
 use App\Http\Controllers\Api\ProfileTrip\TripPlanController;
 use App\Http\Controllers\Api\ProfileTrip\TaskController;
 use App\Http\Controllers\Api\ProfileTrip\ExpenseController;
+use App\Http\Controllers\Api\ProfileTrip\ExpenseSplitController;
 
 
 //Authorization routes
@@ -53,6 +54,8 @@ Route::middleware('auth:sanctum')->scopeBindings()->group(function () {
         Route::put('expenses/{expense}', [ExpenseController::class, 'update']);
         Route::delete('expenses/{expense}', [ExpenseController::class, 'destroy']);
 
+        Route::put('expenses/{expense}/splits/{split}', [ExpenseController::class, 'updateSplit']);
+        Route::patch('expenses/{expense}/splits/{split}', [ExpenseController::class, 'updateSplit']);
     });
 
     Route::get('/notifications', [NotificationController::class, 'index']);
