@@ -4,6 +4,8 @@ import { getTrip, updateTrip, getTripMembers, type Trip, type Member } from '../
 
 const sidebarItems = [
   { label: 'Team', icon: '/icons/team.svg', path: 'team' },
+  { label: 'Travel Plan', icon: '/icons/travel-plan.svg', path: 'travel-plan' },
+  { label: 'Kanban Board', icon: '/icons/kanban-board.svg', path: 'kanban' },
   { label: 'Expenses', icon: '/icons/expenses.svg', path: 'expenses' },
 ];
 
@@ -120,17 +122,16 @@ const TeamPage = () => {
                 className="rounded-lg border border-[#3d3d5e] px-3 py-1 text-2xl font-bold text-gray-900 outline-none"
               />
             ) : (
-              <h1
-                onClick={() => setIsEditingTitle(true)}
-                className="cursor-pointer text-2xl font-bold text-gray-900 transition hover:text-[#3d3d5e]"
-                title="Click to edit"
-              >
+              <h1 className="text-2xl font-bold text-gray-900">
                 {trip?.title || 'Trip Name'}
               </h1>
             )}
           </div>
-          <button className="rounded-full bg-[#3d3d5e] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#2f2f4a]">
-            Add an event
+          <button
+            onClick={() => setIsEditingTitle(true)}
+            className="rounded-full bg-[#3d3d5e] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#2f2f4a]"
+          >
+            Edit Trip Name
           </button>
         </div>
 
