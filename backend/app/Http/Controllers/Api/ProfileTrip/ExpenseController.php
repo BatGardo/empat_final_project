@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Trip;
 use App\Models\Expense;
+use App\Models\ExpenseSplit;
 
 class ExpenseController extends Controller
 {
@@ -14,7 +15,7 @@ class ExpenseController extends Controller
         $this->authorize('view', $trip);
 
         return response()->json(
-            $trip->expenses
+            $trip->expenses()->with('splits.user')->get()
         );
     }
 
@@ -54,8 +55,6 @@ class ExpenseController extends Controller
         ]));
 
         if ($request->has('splits')) {
-            $expense->splits()->delete();
-
             foreach ($request->splits as $split) {
                 $expense->splits()->create([
                     'user_id' => $split['user_id'],
@@ -65,6 +64,21 @@ class ExpenseController extends Controller
         }
 
         return response()->json($expense->load('splits'));
+    }
+
+    public function updateSplit(Request $request, Trip $trip, Expense $expense, ExpenseSplit $split)
+    {
+        $this->authorize('update', $trip);
+
+        if ($split->expense_id !== $expense->id) {
+            abort(404);
+        }
+
+        $split->update([
+            'is_paid' => $request->is_paid
+        ]);
+
+        return response()->json($split);
     }
 
 
