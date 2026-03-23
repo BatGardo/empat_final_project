@@ -17,11 +17,6 @@ const statusMap: Record<string, string> = {
   completed: 'Done',
 };
 
-const reverseStatusMap: Record<string, string> = {
-  'To Do': 'pending',
-  'Doing': 'in_progress',
-  'Done': 'completed',
-};
 
 const KanbanPage = () => {
   const { tripId } = useParams<{ tripId: string }>();
