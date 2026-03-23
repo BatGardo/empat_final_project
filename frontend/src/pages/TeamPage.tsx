@@ -16,6 +16,8 @@ const TeamPage = () => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isAddingMember, setIsAddingMember] = useState(false);
+  const [newMemberName, setNewMemberName] = useState('');
 
   useEffect(() => {
     if (!tripId) return;
@@ -24,11 +26,25 @@ const TeamPage = () => {
       .then(([tripData, membersData]) => {
         setTrip(tripData);
         setEditTitle(tripData.title);
-        setMembers(membersData);
+        const saved = localStorage.getItem(`members_${tripId}`);
+        if (saved) {
+          const localMembers: Member[] = JSON.parse(saved);
+          const apiIds = new Set(membersData.map((m: Member) => m.id));
+          const localOnly = localMembers.filter((m) => !apiIds.has(m.id));
+          setMembers([...membersData, ...localOnly]);
+        } else {
+          setMembers(membersData);
+        }
       })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [tripId]);
+
+  useEffect(() => {
+    if (tripId && members.length > 0) {
+      localStorage.setItem(`members_${tripId}`, JSON.stringify(members));
+    }
+  }, [members, tripId]);
 
   const handleTitleSave = async () => {
     if (!trip || !editTitle.trim() || editTitle === trip.title) {
@@ -79,7 +95,6 @@ const TeamPage = () => {
 
   return (
     <div className="flex min-h-[calc(100vh-57px)]">
-      {/* Sidebar */}
       <aside className="w-60 border-r border-gray-200 bg-white px-4 py-6">
         <NavLink to="/dashboard" className="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900">
           &lt; Back
@@ -105,9 +120,7 @@ const TeamPage = () => {
         </nav>
       </aside>
 
-      {/* Main Content */}
       <main className="relative flex-1 bg-[#f9f9fb] p-8">
-        {/* Header */}
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src="/vehicles/hot-air-balloon.svg" alt="" className="h-[100px] w-auto opacity-20 grayscale" />
@@ -135,7 +148,6 @@ const TeamPage = () => {
           </button>
         </div>
 
-        {/* Divider + Sort/Filter */}
         <div className="mb-6 flex items-center justify-between border-b border-gray-200 pb-4">
           <div />
           <div className="flex items-center gap-3">
@@ -148,7 +160,6 @@ const TeamPage = () => {
           </div>
         </div>
 
-        {/* Action Bars */}
         <div className="mb-8 flex gap-4">
           <div className="flex flex-1 items-center justify-between rounded-xl bg-[#3d3d5e] px-6 py-3 font-semibold text-white">
             <span>Travel Date</span>
@@ -163,7 +174,6 @@ const TeamPage = () => {
           </div>
         </div>
 
-        {/* Members */}
         <div className="rounded-xl bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between border-b border-gray-200 pb-3">
             <h2 className="text-lg font-semibold text-gray-900">Members</h2>
@@ -182,27 +192,81 @@ const TeamPage = () => {
                 {member.pivot.role === 'owner' ? (
                   <span className="text-sm text-gray-400">You</span>
                 ) : (
-                  <button className="text-sm text-gray-400 transition hover:text-gray-700">
+                  <button
+                    onClick={() => setMembers(members.filter((m) => m.id !== member.id))}
+                    className="text-sm text-gray-400 transition hover:text-gray-700"
+                  >
                     ✕
                   </button>
                 )}
               </div>
             ))}
 
-            {/* Add member */}
             {members.length < 20 && (
-              <div className="flex gap-3">
-                <button className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-gray-300 px-5 py-3 text-sm text-gray-400 transition hover:border-[#3d3d5e] hover:text-[#3d3d5e]">
-                  + Add member
-                </button>
-                <button className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-gray-300 px-5 py-3 text-sm text-gray-400 transition hover:border-[#3d3d5e] hover:text-[#3d3d5e]">
-                  + Invite link
-                </button>
-              </div>
+              <>
+                {isAddingMember ? (
+                  <div className="flex items-center gap-3 rounded-xl border border-[#3d3d5e] px-5 py-3">
+                    <input
+                      type="text"
+                      value={newMemberName}
+                      onChange={(e) => setNewMemberName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && newMemberName.trim()) {
+                          const newMember: Member = {
+                            id: Date.now(),
+                            name: newMemberName.trim(),
+                            email: '',
+                            pivot: { trip_id: tripId || '', user_id: Date.now(), role: 'member' },
+                          };
+                          setMembers([...members, newMember]);
+                          setNewMemberName('');
+                          setIsAddingMember(false);
+                        }
+                        if (e.key === 'Escape') {
+                          setIsAddingMember(false);
+                          setNewMemberName('');
+                        }
+                      }}
+                      placeholder="Enter name..."
+                      autoFocus
+                      className="flex-1 text-sm text-gray-700 outline-none"
+                    />
+                    <button
+                      onClick={() => {
+                        if (newMemberName.trim()) {
+                          const newMember: Member = {
+                            id: Date.now(),
+                            name: newMemberName.trim(),
+                            email: '',
+                            pivot: { trip_id: tripId || '', user_id: Date.now(), role: 'member' },
+                          };
+                          setMembers([...members, newMember]);
+                          setNewMemberName('');
+                          setIsAddingMember(false);
+                        }
+                      }}
+                      className="text-sm font-medium text-[#3d3d5e] hover:text-[#2f2f4a]"
+                    >
+                      Add
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setIsAddingMember(true)}
+                      className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-gray-300 px-5 py-3 text-sm text-gray-400 transition hover:border-[#3d3d5e] hover:text-[#3d3d5e]"
+                    >
+                      + Add member
+                    </button>
+                    <button className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-gray-300 px-5 py-3 text-sm text-gray-400 transition hover:border-[#3d3d5e] hover:text-[#3d3d5e]">
+                      + Invite link
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
-        {/* Watermark */}
         <img src="/vehicles/Union.svg" alt="" className="fixed bottom-10 right-10 h-40 w-auto opacity-10 grayscale pointer-events-none" />
       </main>
     </div>

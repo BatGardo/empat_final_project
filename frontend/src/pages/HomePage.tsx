@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell } from 'recharts';
 
 const chartPreviewData = [
   { name: 'Tents', value: 800 },
@@ -14,7 +14,6 @@ const HomePage = () => {
 
   return (
     <>
-      {/* Hero */}
       <section className="flex min-h-[calc(100vh-57px)] items-center justify-center bg-[#eeeef8] px-6 py-16">
         <div className="flex flex-col items-center text-center">
           <div className="mb-6 flex items-center gap-6">
@@ -41,10 +40,8 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Features + Expenses Preview */}
       <section className="bg-white px-6 py-20">
         <div className="mx-auto flex max-w-6xl items-center gap-16">
-          {/* Left — Text */}
           <div className="flex-1">
             <h2 className="mb-6 text-3xl font-bold leading-tight text-gray-900">
               Replace Spreadsheets
@@ -87,12 +84,10 @@ const HomePage = () => {
             </div>
           </div>
 
-          {/* Right — Expenses Preview Card */}
           <div
             onClick={() => navigate('/travel/019d0145-5951-736c-9831-04fc78994e8d/expenses')}
             className="w-[560px] cursor-pointer rounded-2xl border border-gray-200 bg-[#f9f9fb] p-8 shadow-lg transition hover:shadow-xl"
           >
-            {/* Mini header */}
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-lg font-bold text-gray-900">Expenses</h3>
               <span className="rounded-full bg-[#3d3d5e] px-3 py-1 text-xs font-medium text-white">
@@ -100,19 +95,16 @@ const HomePage = () => {
               </span>
             </div>
 
-            {/* Sort / Filter */}
             <div className="mb-3 flex justify-end gap-2">
               <span className="rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-500">☰ Sort by</span>
               <span className="rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-500">Filter</span>
             </div>
 
-            {/* Global Amount */}
             <div className="mb-4 flex items-center justify-between rounded-lg bg-[#3d3d5e] px-4 py-2 text-sm font-semibold text-white">
               <span>Global Amount</span>
               <span>1 233 321</span>
             </div>
 
-            {/* Categories */}
             <div className="mb-4 space-y-2">
               <div className="flex items-center justify-between rounded-lg bg-[#eeeef8] px-4 py-2 text-xs">
                 <span className="text-gray-500">Grocery</span>
@@ -120,25 +112,22 @@ const HomePage = () => {
               </div>
             </div>
 
-            {/* Chart + text */}
             <div className="flex items-center gap-4">
               <div className="h-48 w-48 min-h-[192px] min-w-[192px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={chartPreviewData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      dataKey="value"
-                      stroke="none"
-                    >
-                      {chartPreviewData.map((_entry, index) => (
-                        <Cell key={index} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
+                <PieChart width={192} height={192}>
+                  <Pie
+                    data={chartPreviewData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    {chartPreviewData.map((_entry, index) => (
+                      <Cell key={index} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                    ))}
+                  </Pie>
+                </PieChart>
               </div>
               <div className="flex-1 space-y-1">
                 <p className="text-xs text-gray-400">Calculation: No one has calculated anything yet</p>

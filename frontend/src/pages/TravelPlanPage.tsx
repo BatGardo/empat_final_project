@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
-import { getTrip, type Trip } from '../api';
+import { getTrip, getTripPlan, createPlanItem, deletePlanItem, type Trip, type PlanItem } from '../api';
 
 const sidebarItems = [
   { label: 'Team', icon: '/icons/team.svg', path: 'team' },
@@ -9,35 +9,82 @@ const sidebarItems = [
   { label: 'Expenses', icon: '/icons/expenses.svg', path: 'expenses' },
 ];
 
-interface DayPlan {
-  date: string;
-  events: string[];
-}
+const formatDateLabel = (dateStr: string) => {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+};
 
-const days: DayPlan[] = [
-  {
-    date: 'March 11, 2026',
-    events: ['Event 1', 'Event 2'],
-  },
-  {
-    date: 'March 12, 2026',
-    events: ['Event 1', 'Event 2'],
-  },
-];
+const generateDays = (startDate: string, endDate: string) => {
+  const days: string[] = [];
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const current = new Date(start);
+  while (current <= end) {
+    days.push(current.toISOString().split('T')[0]);
+    current.setDate(current.getDate() + 1);
+  }
+  return days;
+};
 
 const TravelPlanPage = () => {
   const { tripId } = useParams<{ tripId: string }>();
   const [trip, setTrip] = useState<Trip | null>(null);
+  const [planItems, setPlanItems] = useState<PlanItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newEventTitle, setNewEventTitle] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!tripId) return;
-    getTrip(tripId).then(setTrip).catch(console.error);
+    setLoading(true);
+    Promise.all([getTrip(tripId), getTripPlan(tripId)])
+      .then(([tripData, planData]) => {
+        setTrip(tripData);
+        setPlanItems(planData);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, [tripId]);
+
+  const daysList = trip ? generateDays(trip.start_date, trip.end_date) : [];
+
+  const getEventsForDay = (day: string) => {
+    return planItems.filter((item) => item.date.startsWith(day));
+  };
+
+  const handleAddEvent = async (day: string) => {
+    const title = newEventTitle[day]?.trim();
+    if (!tripId || !title) return;
+    try {
+      const created = await createPlanItem(tripId, { title, date: day });
+      setPlanItems([...planItems, created]);
+      setNewEventTitle({ ...newEventTitle, [day]: '' });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteEvent = async (planId: string) => {
+    if (!tripId) return;
+    try {
+      await deletePlanItem(tripId, planId);
+      setPlanItems(planItems.filter((p) => p.id !== planId));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[calc(100vh-57px)] items-center justify-center">
+        <p className="text-gray-500">Loading...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-[calc(100vh-57px)]">
-      {/* Sidebar */}
       <aside className="w-60 border-r border-gray-200 bg-white px-4 py-6">
-        <NavLink to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900">
+        <NavLink to="/dashboard" className="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900">
           &lt; Back
         </NavLink>
         <h2 className="mb-6 text-xl font-bold text-gray-900">{trip?.title || 'Travel Name'}</h2>
@@ -61,47 +108,63 @@ const TravelPlanPage = () => {
         </nav>
       </aside>
 
-      {/* Main Content */}
       <main className="relative flex-1 bg-[#f9f9fb] p-8">
-        {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src="/vehicles/hot-air-balloon.svg" alt="" className="h-[100px] w-auto opacity-20 grayscale" />
             <h1 className="text-2xl font-bold text-gray-900">Travel plan</h1>
           </div>
-          <button className="rounded-full bg-[#3d3d5e] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#2f2f4a]">
-            Add an event
-          </button>
         </div>
 
-        {/* Days */}
         <div className="space-y-6">
-          {days.map((day) => (
-            <div key={day.date}>
-              {/* Date Label */}
-              <div className="mb-3 inline-block rounded border border-gray-300 bg-white px-4 py-1 text-sm font-medium text-gray-700">
-                {day.date}
-              </div>
+          {daysList.map((day) => {
+            const events = getEventsForDay(day);
+            return (
+              <div key={day}>
+                <div className="mb-3 inline-block rounded border border-gray-300 bg-white px-4 py-1 text-sm font-medium text-gray-700">
+                  {formatDateLabel(day)}
+                </div>
 
-              {/* Events */}
-              <div className="space-y-3 rounded-xl border border-dashed border-gray-300 p-6">
-                {day.events.map((event, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between rounded-full border border-gray-200 bg-white px-5 py-3"
-                  >
-                    <span className="text-sm text-gray-700">{event}</span>
-                    <button className="text-sm text-gray-400 transition hover:text-gray-700">
-                      ✕
+                <div className="space-y-3 rounded-xl border border-dashed border-gray-300 p-6">
+                  {events.map((event) => (
+                    <div
+                      key={event.id}
+                      className="flex items-center justify-between rounded-full border border-gray-200 bg-white px-5 py-3"
+                    >
+                      <span className="text-sm text-gray-700">{event.title}</span>
+                      <button
+                        onClick={() => handleDeleteEvent(event.id)}
+                        className="text-sm text-gray-400 transition hover:text-gray-700"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+
+                  <div className="flex items-center gap-3 rounded-full border border-gray-200 bg-white px-5 py-3">
+                    <input
+                      type="text"
+                      value={newEventTitle[day] || ''}
+                      onChange={(e) => setNewEventTitle({ ...newEventTitle, [day]: e.target.value })}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleAddEvent(day);
+                      }}
+                      placeholder="Add event..."
+                      className="flex-1 text-sm text-gray-700 outline-none placeholder:text-gray-400"
+                    />
+                    <button
+                      onClick={() => handleAddEvent(day)}
+                      className="text-sm font-medium text-[#3d3d5e] hover:text-[#2f2f4a]"
+                    >
+                      +
                     </button>
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        {/* Watermark */}
         <img src="/vehicles/Union.svg" alt="" className="fixed bottom-10 right-10 h-40 w-auto opacity-10 grayscale pointer-events-none" />
       </main>
     </div>

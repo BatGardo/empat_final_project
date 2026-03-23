@@ -6,6 +6,8 @@ import TeamPage from './pages/TeamPage';
 import KanbanPage from './pages/KanbanPage';
 import TravelPlanPage from './pages/TravelPlanPage';
 import DashboardPage from './pages/DashboardPage';
+import LoginPage from './pages/LoginPage';
+import ProfilePage from './pages/ProfilePage';
 import Layout from './Layout';
 
 function App() {
@@ -14,7 +16,9 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
+          <Route path="login" element={<LoginPage />} />
           <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="profile" element={<ProfilePage />} />
           <Route path="accounts" element={<AccountsPage />} />
           <Route path="travel/:tripId/team" element={<TeamPage />} />
           <Route path="travel/:tripId/travel-plan" element={<TravelPlanPage />} />
