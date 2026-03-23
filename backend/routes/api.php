@@ -22,6 +22,9 @@ Route::prefix('auth')->group(function () {
 //Authorized routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
+    Route::put('/me', [AuthController::class, 'update']);
+    Route::patch('/me', [AuthController::class, 'update']);
+
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 
