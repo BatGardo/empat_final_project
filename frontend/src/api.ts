@@ -30,49 +30,20 @@ export interface DashboardData {
   deadlines: unknown[];
 }
 
-async function login(): Promise<string> {
-  const res = await fetch(`${API_URL}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: 'admin@example.com', password: 'password123' }),
-  });
-  if (!res.ok) throw new Error('Login failed');
-  const data = await res.json();
-  const token = data.token;
-  localStorage.setItem('auth_token', token);
-  localStorage.setItem('auth_user', JSON.stringify(data.user));
-  return token;
-}
-
-async function getToken(): Promise<string> {
-  const token = localStorage.getItem('auth_token');
-  if (token) return token;
-  return login();
+function getToken(): string | null {
+  return localStorage.getItem('token');
 }
 
 async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
-  const token = await getToken();
-  const res = await fetch(url, {
+  const token = getToken();
+  return fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
       ...options.headers,
     },
   });
-  if (res.status === 401) {
-    localStorage.removeItem('auth_token');
-    const newToken = await login();
-    return fetch(url, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${newToken}`,
-        ...options.headers,
-      },
-    });
-  }
-  return res;
 }
 
 export async function getTrip(tripId: string): Promise<Trip> {
