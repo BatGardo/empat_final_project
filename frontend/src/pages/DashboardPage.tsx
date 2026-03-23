@@ -15,6 +15,16 @@ const statusStyle = (status: string) => {
   }
 };
 
+const getTripStatus = (trip: Trip) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const start = new Date(trip.start_date);
+  const end = new Date(trip.end_date);
+  if (today > end) return 'Done';
+  if (today >= start && today <= end) return 'In Progress';
+  return 'Planning';
+};
+
 const formatDate = (start: string, end: string) => {
   const s = new Date(start);
   const e = new Date(end);
@@ -104,8 +114,8 @@ const DashboardPage = () => {
                     {trip.cover_image_url && (
                       <img src={trip.cover_image_url} alt="" className="h-full w-full rounded-t-xl object-cover" />
                     )}
-                    <span className={`absolute top-3 right-3 rounded border bg-white px-3 py-0.5 text-xs font-medium ${statusStyle('Planning')}`}>
-                      Planning
+                    <span className={`absolute top-3 right-3 rounded border bg-white px-3 py-0.5 text-xs font-medium ${statusStyle(getTripStatus(trip))}`}>
+                      {getTripStatus(trip)}
                     </span>
                   </div>
 
