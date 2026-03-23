@@ -15,7 +15,7 @@ const Layout = () => {
             <NavLink to="/dashboard" className="text-sm font-medium text-gray-700 transition hover:text-gray-900">
               Dashboard
             </NavLink>
-            <NavLink to="/accounts" className="text-sm font-medium text-gray-700 transition hover:text-gray-900">
+            <NavLink to="/profile" className="text-sm font-medium text-gray-700 transition hover:text-gray-900">
               Profile
             </NavLink>
           </nav>

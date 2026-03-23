@@ -62,7 +62,6 @@ const ExpensesPage = () => {
 
   return (
     <div className="flex min-h-[calc(100vh-57px)]">
-      {/* Sidebar */}
       <aside className="w-60 border-r border-gray-200 bg-white px-4 py-6">
         <NavLink to="/dashboard" className="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900">
           &lt; Back
@@ -88,15 +87,12 @@ const ExpensesPage = () => {
         </nav>
       </aside>
 
-      {/* Main Content */}
       <main className="relative flex-1 bg-[#f9f9fb] p-8">
-        {/* Header */}
         <div className="mb-6 flex items-center gap-3">
           <img src="/vehicles/hot-air-balloon.svg" alt="" className="h-[100px] w-auto opacity-20 grayscale" />
           <h1 className="text-2xl font-bold text-gray-900">Expenses</h1>
         </div>
 
-        {/* Divider + Sort/Filter */}
         <div className="mb-6 flex items-center justify-between border-b border-gray-200 pb-4">
           <div />
           <div className="flex items-center gap-3">
@@ -109,7 +105,6 @@ const ExpensesPage = () => {
           </div>
         </div>
 
-        {/* Action Bars */}
         <div className="mb-6 flex gap-4">
           <div className="flex flex-1 items-center justify-between rounded-xl bg-[#3d3d5e] px-6 py-3 font-semibold text-white">
             <span>Global Amount</span>
@@ -124,9 +119,7 @@ const ExpensesPage = () => {
           </div>
         </div>
 
-        {/* Chart + Expenses List */}
         <div className="flex gap-6">
-          {/* Pie Chart */}
           <div className="flex h-64 w-64 items-center justify-center rounded-xl bg-white p-4 shadow-sm">
             {chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -151,7 +144,6 @@ const ExpensesPage = () => {
             )}
           </div>
 
-          {/* Expense Items */}
           <div className="flex-1 space-y-4">
             {expenses.length === 0 ? (
               <p className="text-sm text-gray-400">No expenses yet</p>
@@ -173,7 +165,6 @@ const ExpensesPage = () => {
           </div>
         </div>
 
-        {/* Create Expense Modal */}
         {showForm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowForm(false)}>
             <div className="w-[400px] rounded-2xl bg-white p-8" onClick={(e) => e.stopPropagation()}>
@@ -234,7 +225,6 @@ const ExpensesPage = () => {
           </div>
         )}
 
-        {/* Watermark */}
         <img src="/vehicles/Union.svg" alt="" className="fixed bottom-10 right-10 h-40 w-auto opacity-10 grayscale pointer-events-none" />
       </main>
     </div>
