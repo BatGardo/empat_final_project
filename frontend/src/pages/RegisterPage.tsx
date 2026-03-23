@@ -12,7 +12,6 @@ const RegisterPage = () => {
     register,
     handleSubmit,
     setError,
-    reset,
     formState: { errors },
   } = useForm<RegisterInterface>({
     resolver: yupResolver(registerSchema),
@@ -22,9 +21,6 @@ const RegisterPage = () => {
 
   const submitForm = async (data: RegisterInterface) => {
     await handleRegister(data, setError);
-    if (!errors.root) {
-      reset();
-    }
   };
 
   return (
@@ -62,6 +58,7 @@ const RegisterPage = () => {
           <Input
             label="Password"
             placeholder="Password"
+            type="password"
             error={errors.password?.message}
             {...register('password')}
           />
@@ -69,9 +66,16 @@ const RegisterPage = () => {
           <Input
             label="Confirm password"
             placeholder="Password"
-            error={errors.confirm_password?.message}
-            {...register('confirm_password')}
+            type="password"
+            error={errors.password_confirmation?.message}
+            {...register('password_confirmation')}
           />
+
+          {errors.root && (
+            <div className="mb-4 text-left text-sm text-red-600">
+              {errors.root.message}
+            </div>
+          )}
 
           <button
             type="submit"

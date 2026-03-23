@@ -12,7 +12,6 @@ const LoginPage = () => {
     register,
     handleSubmit,
     setError,
-    reset,
     formState: { errors },
   } = useForm<LoginInterface>({
     resolver: yupResolver(loginSchema),
@@ -22,9 +21,6 @@ const LoginPage = () => {
 
   const submitForm = async (data: LoginInterface) => {
     await handleLogin(data, setError);
-    if (!errors.root) {
-      reset();
-    }
   };
 
   return (
@@ -60,9 +56,16 @@ const LoginPage = () => {
           <Input
             label="Password"
             placeholder="Password"
+            type="password"
             error={errors.password?.message}
             {...register('password')}
           />
+
+          {errors.root && (
+            <div className="mb-4 text-left text-sm text-red-600">
+              {errors.root.message}
+            </div>
+          )}
 
           <button
             type="submit"

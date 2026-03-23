@@ -31,7 +31,9 @@ const Input = ({ label, error, required, ...props }: InputProps) => {
       ></input>
 
       {error && (
-        <p className="mt-2 block justify-self-start text-red-600">{error}</p>
+        <p className="mt-2 block justify-self-start text-sm text-red-600">
+          {error}
+        </p>
       )}
     </div>
   );

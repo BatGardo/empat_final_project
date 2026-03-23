@@ -19,7 +19,7 @@ export const registerSchema = loginSchema.concat(
       .required('Name is required.')
       .min(2, 'Name is too short.')
       .max(120),
-    confirm_password: yup
+    password_confirmation: yup
       .string()
       .oneOf([yup.ref('password')], 'Passwords should match.')
       .required('Confirmation is required'),

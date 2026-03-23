@@ -1,4 +1,5 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { baseQuery } from './baseApi';
 import type { LoginInterface, RegisterInterface } from '../auth-schema/types';
 
 export interface User {
@@ -7,12 +8,14 @@ export interface User {
   email: string;
 }
 
+export interface AuthResponse {
+  user: User;
+  token: string;
+}
+
 export const authApi = createApi({
   reducerPath: 'authApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_URL,
-    credentials: 'include',
-  }),
+  baseQuery,
   tagTypes: ['auth'],
   endpoints: (builder) => ({
     checkSession: builder.query<User, void>({
@@ -20,23 +23,20 @@ export const authApi = createApi({
       providesTags: ['auth'],
     }),
 
-    login: builder.mutation<User, LoginInterface>({
-      query: (credentials) => ({
-        url: '/login',
+    login: builder.mutation<AuthResponse, LoginInterface>({
+      query: (body) => ({
+        url: '/auth/login',
         method: 'POST',
-        body: credentials,
+        body,
       }),
       invalidatesTags: ['auth'],
     }),
 
-    register: builder.mutation<
-      User,
-      Omit<RegisterInterface, 'confirm_password'>
-    >({
-      query: (data) => ({
-        url: '/register',
+    register: builder.mutation<AuthResponse, RegisterInterface>({
+      query: (body) => ({
+        url: '/auth/register',
         method: 'POST',
-        body: data,
+        body,
       }),
       invalidatesTags: ['auth'],
     }),
