@@ -35,6 +35,7 @@ class DashboardController extends Controller
             });
         })
         ->whereNotNull('due_date')
+        ->where('status', '!=', 'done')
         ->orderBy('due_date')
         ->limit(5)
         ->get();
