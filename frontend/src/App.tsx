@@ -2,7 +2,6 @@ import { Routes, Route, BrowserRouter } from 'react-router';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import AccountsPage from './pages/AccountsPage';
 import ExpensesPage from './pages/ExpensesPage';
 import TeamPage from './pages/TeamPage';
 import KanbanPage from './pages/KanbanPage';
@@ -24,7 +23,6 @@ function App() {
           <Route element={<Layout />}>
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="profile" element={<ProfilePage />} />
-            <Route path="accounts" element={<AccountsPage />} />
             <Route path="travel/:tripId/team" element={<TeamPage />} />
             <Route path="travel/:tripId/travel-plan" element={<TravelPlanPage />} />
             <Route path="travel/:tripId/kanban" element={<KanbanPage />} />
