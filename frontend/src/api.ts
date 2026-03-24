@@ -71,6 +71,14 @@ export async function getTripMembers(tripId: string): Promise<Member[]> {
   return res.json();
 }
 
+export interface ExpenseSplit {
+  id: string;
+  expense_id: string;
+  user_id: number;
+  is_paid: boolean;
+  user: { id: number; name: string; email: string };
+}
+
 export interface Expense {
   id: string;
   trip_id: string;
@@ -81,6 +89,7 @@ export interface Expense {
   paid_by: number;
   created_at: string;
   updated_at: string;
+  splits: ExpenseSplit[];
 }
 
 export async function getTripExpenses(tripId: string): Promise<Expense[]> {
@@ -102,6 +111,11 @@ export async function createExpense(tripId: string, data: { title: string; total
   return res.json();
 }
 
+export async function deleteExpense(tripId: string, expenseId: string): Promise<void> {
+  const res = await authFetch(`${API_URL}/trips/${tripId}/expenses/${expenseId}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to delete expense');
+}
+
 export async function createTrip(data: { title: string; destination: string; start_date: string; end_date: string; budget_amount: number; budget_currency: string }): Promise<Trip> {
   const res = await authFetch(`${API_URL}/trips`, {
     method: 'POST',
@@ -112,6 +126,18 @@ export async function createTrip(data: { title: string; destination: string; sta
     console.error('Create trip error:', res.status, error);
     throw new Error('Failed to create trip');
   }
+  return res.json();
+}
+
+export async function createInvite(tripId: string): Promise<{ invite_token: string; accept_api_url: string }> {
+  const res = await authFetch(`${API_URL}/trips/${tripId}/invite`, { method: 'POST' });
+  if (!res.ok) throw new Error('Failed to create invite');
+  return res.json();
+}
+
+export async function acceptInvite(token: string): Promise<{ message: string; trip_id: string }> {
+  const res = await authFetch(`${API_URL}/invite/${token}`, { method: 'POST' });
+  if (!res.ok) throw new Error('Failed to accept invite');
   return res.json();
 }
 
@@ -154,7 +180,7 @@ export async function createTask(tripId: string, data: { title: string; status: 
   return res.json();
 }
 
-export async function updateTask(tripId: string, taskId: string, data: Partial<{ title: string; status: string; importance: string; assigned_to: number | null }>): Promise<ApiTask> {
+export async function updateTask(tripId: string, taskId: string, data: Partial<{ title: string; status: string; importance: string; assigned_to: number | null; due_date: string | null }>): Promise<ApiTask> {
   const res = await authFetch(`${API_URL}/trips/${tripId}/tasks/${taskId}`, {
     method: 'PUT',
     body: JSON.stringify(data),

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
-import { getTrip, updateTrip, getTripMembers, type Trip, type Member } from '../api';
+import { getTrip, updateTrip, getTripMembers, createInvite, getMe, type Trip, type Member } from '../api';
 
 const sidebarItems = [
   { label: 'Team', icon: '/icons/team.svg', path: 'team' },
@@ -16,8 +16,9 @@ const TeamPage = () => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [loading, setLoading] = useState(true);
-  const [isAddingMember, setIsAddingMember] = useState(false);
-  const [newMemberName, setNewMemberName] = useState('');
+  const [showInvite, setShowInvite] = useState(false);
+  const [inviteToken, setInviteToken] = useState('');
+  const [inviteUrl, setInviteUrl] = useState('');
 
   useEffect(() => {
     if (!tripId) return;
@@ -186,7 +187,7 @@ const TeamPage = () => {
                 className="flex items-center justify-between rounded-xl border border-gray-200 px-5 py-3"
               >
                 <span className="text-sm text-gray-700">{member.name}</span>
-                {member.pivot.role === 'owner' ? (
+                {member.id === getMe()?.id ? (
                   <span className="text-sm text-gray-400">You</span>
                 ) : (
                   <button
@@ -200,70 +201,51 @@ const TeamPage = () => {
             ))}
 
             {members.length < 20 && (
-              <>
-                {isAddingMember ? (
-                  <div className="flex items-center gap-3 rounded-xl border border-[#3d3d5e] px-5 py-3">
-                    <input
-                      type="text"
-                      value={newMemberName}
-                      onChange={(e) => setNewMemberName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && newMemberName.trim()) {
-                          const newMember: Member = {
-                            id: Date.now(),
-                            name: newMemberName.trim(),
-                            email: '',
-                            pivot: { trip_id: tripId || '', user_id: Date.now(), role: 'member' },
-                          };
-                          setMembers([...members, newMember]);
-                          setNewMemberName('');
-                          setIsAddingMember(false);
-                        }
-                        if (e.key === 'Escape') {
-                          setIsAddingMember(false);
-                          setNewMemberName('');
-                        }
-                      }}
-                      placeholder="Enter name..."
-                      autoFocus
-                      className="flex-1 text-sm text-gray-700 outline-none"
-                    />
-                    <button
-                      onClick={() => {
-                        if (newMemberName.trim()) {
-                          const newMember: Member = {
-                            id: Date.now(),
-                            name: newMemberName.trim(),
-                            email: '',
-                            pivot: { trip_id: tripId || '', user_id: Date.now(), role: 'member' },
-                          };
-                          setMembers([...members, newMember]);
-                          setNewMemberName('');
-                          setIsAddingMember(false);
-                        }
-                      }}
-                      className="text-sm font-medium text-[#3d3d5e] hover:text-[#2f2f4a]"
-                    >
-                      Add
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => setIsAddingMember(true)}
-                      className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-gray-300 px-5 py-3 text-sm text-gray-400 transition hover:border-[#3d3d5e] hover:text-[#3d3d5e]"
-                    >
-                      + Add member
-                    </button>
-                    <button className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-gray-300 px-5 py-3 text-sm text-gray-400 transition hover:border-[#3d3d5e] hover:text-[#3d3d5e]">
-                      + Invite link
-                    </button>
-                  </div>
-                )}
-              </>
+              <button
+                onClick={async () => {
+                  if (!tripId) return;
+                  try {
+                    const data = await createInvite(tripId);
+                    setInviteToken(data.invite_token);
+                    setInviteUrl(data.accept_api_url);
+                    setShowInvite(true);
+                  } catch (err) {
+                    console.error(err);
+                  }
+                }}
+                className="flex w-full items-center justify-center rounded-xl border border-dashed border-gray-300 px-5 py-3 text-sm text-gray-400 transition hover:border-[#3d3d5e] hover:text-[#3d3d5e]"
+              >
+                + Generate Invite Link
+              </button>
             )}
           </div>
         </div>
+        {showInvite && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowInvite(false)}>
+            <div className="w-[400px] rounded-2xl bg-white p-8" onClick={(e) => e.stopPropagation()}>
+              <h2 className="mb-4 text-xl font-bold text-gray-900">Invite Link</h2>
+              <p className="mb-3 text-sm text-gray-500">Share this link with others to join the trip:</p>
+              <div className="mb-4 flex items-center gap-2 rounded-lg bg-[#eeeef8] px-4 py-3">
+                <span className="flex-1 select-all text-sm font-mono text-gray-700 break-all">{inviteUrl}</span>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(inviteUrl);
+                  }}
+                  className="shrink-0 text-sm font-medium text-[#3d3d5e] hover:text-[#2f2f4a]"
+                >
+                  Copy
+                </button>
+              </div>
+              <button
+                onClick={() => setShowInvite(false)}
+                className="w-full rounded-full bg-[#3d3d5e] py-2 text-sm font-medium text-white transition hover:bg-[#2f2f4a]"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        )}
+
         <img src="/vehicles/Union.svg" alt="" className="fixed bottom-10 right-10 hidden h-40 w-auto opacity-10 grayscale pointer-events-none md:block" />
       </main>
 
