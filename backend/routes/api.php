@@ -40,7 +40,7 @@ Route::middleware('auth:sanctum')->scopeBindings()->group(function () {
 
         Route::get('members', [TripMemberController::class, 'index']);
         Route::post('members', [TripMemberController::class, 'store']);
-        Route::delete('members/{user}', [TripMemberController::class, 'destroy']);
+        Route::delete('members/{userId}', [TripMemberController::class, 'destroy']);
 
         Route::get('plan', [TripPlanController::class, 'index']);
         Route::post('plan', [TripPlanController::class, 'store']);

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getDashboard, createTrip, deleteTrip, type Trip } from '../api';
+import { getDashboard, createTrip, acceptInvite, removeMember, getMe, type Trip } from '../api';
 
 const statusStyle = (status: string) => {
   switch (status) {
@@ -25,6 +25,22 @@ const getTripStatus = (trip: Trip) => {
   return 'Planning';
 };
 
+const tripCovers = [
+  '/foto/trips-fotos/pexels-asadphoto-1450360.jpg',
+  '/foto/trips-fotos/pexels-iriser-724712.jpg',
+  '/foto/trips-fotos/pexels-jaime-reimer-1376930-2662116.jpg',
+  '/foto/trips-fotos/pexels-miroalt-176382.jpg',
+  '/foto/trips-fotos/pexels-ozgomz-868097.jpg',
+  '/foto/trips-fotos/pexels-pixabay-459225.jpg',
+  '/foto/trips-fotos/pexels-pixabay-531321.jpg',
+  '/foto/trips-fotos/pexels-stywo-1261728.jpg',
+];
+
+const getTripCover = (tripId: string) => {
+  const hash = tripId.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  return tripCovers[hash % tripCovers.length];
+};
+
 const formatDate = (start: string, end: string) => {
   const s = new Date(start);
   const e = new Date(end);
@@ -47,6 +63,26 @@ const DashboardPage = () => {
   >([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [showInvite, setShowInvite] = useState(false);
+  const [inviteToken, setInviteToken] = useState('');
+  const [inviteError, setInviteError] = useState('');
+
+  const handleAcceptInvite = async () => {
+    if (!inviteToken.trim()) return;
+    setInviteError('');
+    // Extract token from URL or use as-is
+    const input = inviteToken.trim();
+    const token = input.includes('/invite/') ? input.split('/invite/').pop()! : input;
+    try {
+      await acceptInvite(token);
+      setShowInvite(false);
+      setInviteToken('');
+      const data = await getDashboard();
+      setTrips(data.trips || []);
+    } catch {
+      setInviteError('Invalid or expired invite link');
+    }
+  };
   const [newTrip, setNewTrip] = useState({
     title: '',
     destination: '',
@@ -56,11 +92,13 @@ const DashboardPage = () => {
     budget_currency: 'USD',
   });
 
-  const handleDeleteTrip = async (tripId: string, e: React.MouseEvent) => {
+  const handleLeaveTrip = async (tripId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!window.confirm('Delete this trip?')) return;
+    if (!window.confirm('Leave this trip?')) return;
+    const me = getMe();
+    if (!me) return;
     try {
-      await deleteTrip(tripId);
+      await removeMember(tripId, me.id);
       setTrips(trips.filter((t) => t.id !== tripId));
     } catch (err) {
       console.error(err);
@@ -128,6 +166,12 @@ const DashboardPage = () => {
           >
             Add trip
           </button>
+          <button
+            onClick={() => setShowInvite(true)}
+            className="rounded-full border border-gray-300 bg-white px-5 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+          >
+            Join Trip
+          </button>
         </div>
       </div>
 
@@ -148,24 +192,22 @@ const DashboardPage = () => {
                   className="cursor-pointer rounded-xl border border-gray-200 bg-white transition hover:shadow-md"
                 >
                   <div className="relative h-36 rounded-t-xl bg-[#dde2f0]">
-                    {trip.cover_image_url && (
-                      <img
-                        src={trip.cover_image_url}
-                        alt=""
-                        className="h-full w-full rounded-t-xl object-cover"
-                      />
-                    )}
-                    <span
-                      className={`absolute top-3 left-3 rounded border bg-white px-3 py-0.5 text-xs font-medium ${statusStyle(getTripStatus(trip))}`}
-                    >
-                      {getTripStatus(trip)}
-                    </span>
-                    <button
-                      onClick={(e) => handleDeleteTrip(trip.id, e)}
-                      className="absolute top-3 right-3 rounded-full bg-white/80 px-2 py-0.5 text-xs text-gray-400 transition hover:bg-red-50 hover:text-red-500"
-                    >
-                      ✕
-                    </button>
+                    <img
+  src={trip.cover_image_url || getTripCover(trip.id)}
+  alt=""
+  className="h-full w-full rounded-t-xl object-cover"
+/>
+<span
+  className={`absolute top-3 left-3 rounded border bg-white px-3 py-0.5 text-xs font-medium ${statusStyle(getTripStatus(trip))}`}
+>
+  {getTripStatus(trip)}
+</span>
+<button
+  onClick={(e) => handleLeaveTrip(trip.id, e)}
+  className="absolute top-3 right-3 rounded-full bg-white/80 px-2 py-0.5 text-xs text-gray-400 transition hover:bg-red-50 hover:text-red-500"
+>
+  ×
+</button>
                   </div>
 
                   <div className="p-4">
@@ -213,16 +255,9 @@ const DashboardPage = () => {
             ) : (
               <div className="space-y-3">
                 {deadlines.map((task, index) => (
-                  <div
-                    key={index}
-                    className="rounded-xl border border-gray-200 p-4"
-                  >
-                    <p className="mb-1 font-semibold text-gray-900">
-                      {task.title}
-                    </p>
-                    <p className="mb-3 text-xs text-gray-400">
-                      {trips.find((t) => t.id === task.trip_id)?.title || ''}
-                    </p>
+                  <div key={index} onClick={() => navigate(`/travel/${task.trip_id}/kanban`)} className="cursor-pointer rounded-xl border border-gray-200 p-4 transition hover:shadow-md">
+                    <p className="mb-1 font-semibold text-gray-900">{task.title}</p>
+                    <p className="mb-3 text-xs text-gray-400">{trips.find((t) => t.id === task.trip_id)?.title || ''}</p>
                     <div className="flex items-center gap-3">
                       <span
                         className={`rounded border bg-white px-3 py-0.5 text-xs font-medium ${
@@ -378,6 +413,39 @@ const DashboardPage = () => {
                 className="rounded-full bg-[#3d3d5e] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#2f2f4a]"
               >
                 Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showInvite && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowInvite(false)}>
+          <div className="w-[400px] rounded-2xl bg-white p-8" onClick={(e) => e.stopPropagation()}>
+            <h2 className="mb-4 text-xl font-bold text-gray-900">Join a Trip</h2>
+            <p className="mb-3 text-sm text-gray-500">Paste the invite link you received:</p>
+            <input
+              type="text"
+              value={inviteToken}
+              onChange={(e) => setInviteToken(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleAcceptInvite(); }}
+              placeholder="Paste invite link..."
+              autoFocus
+              className="mb-4 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none focus:border-[#3d3d5e]"
+            />
+            {inviteError && <p className="mb-3 text-sm text-red-500">{inviteError}</p>}
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => { setShowInvite(false); setInviteToken(''); setInviteError(''); }}
+                className="rounded-full border border-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAcceptInvite}
+                className="rounded-full bg-[#3d3d5e] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#2f2f4a]"
+              >
+                Join
               </button>
             </div>
           </div>

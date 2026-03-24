@@ -19,7 +19,6 @@ class DashboardController extends Controller
         // Last trips
         $trips = $user->trips()
             ->latest()
-            ->limit(9)
             ->get();
 
         // Last notifications
