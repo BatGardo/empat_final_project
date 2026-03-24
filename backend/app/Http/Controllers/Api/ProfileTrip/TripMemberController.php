@@ -29,14 +29,20 @@ class TripMemberController extends Controller
         ]);
     }
 
-    public function destroy(Trip $trip, User $user)
+    public function destroy(Trip $trip, $userId)
     {
         $this->authorize('update', $trip);
 
-        $trip->members()->detach($user->id);
+        if (!$trip->members()->where('user_id', $userId)->exists()) {
+            return response()->json([
+                'message' => 'User is not a member of this trip'
+            ], 404);
+        }
+
+        $trip->members()->detach($userId);
 
         return response()->json([
-            'message' => 'User removed'
+            'message' => 'User removed from trip'
         ]);
     }
 }
