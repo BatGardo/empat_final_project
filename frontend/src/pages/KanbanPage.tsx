@@ -41,11 +41,19 @@ const KanbanPage = () => {
   const [selectedMemberId, setSelectedMemberId] = useState<string>('');
   const [newTask, setNewTask] = useState({
     title: '',
-    description: '',
-    notes: '',
+    importance: 'medium',
     due_date: '',
+    assigned_to: '',
   });
-  const [mobileStage, setMobileStage] = useState('To Do');
+  
+  const [editingTask, setEditingTask] = useState<ApiTask | null>(null);
+  const [editForm, setEditForm] = useState({
+    title: '',
+    importance: 'medium',
+    due_date: '',
+    assigned_to: '',
+  });
+    const [mobileStage, setMobileStage] = useState('To Do');
 
   useEffect(() => {
     if (!tripId) return;
@@ -74,12 +82,39 @@ const KanbanPage = () => {
       const created = await createTask(tripId, {
         title: newTask.title,
         status: 'pending',
-        importance: 'medium',
+        importance: newTask.importance || 'medium',
+        ...(newTask.assigned_to ? { assigned_to: Number(newTask.assigned_to) } : {}),
         ...(newTask.due_date ? { due_date: newTask.due_date } : {}),
       });
       setTasks([...tasks, created]);
       setShowForm(false);
-      setNewTask({ title: '', description: '', notes: '', due_date: '' });
+      setNewTask({ title: '', importance: 'medium', due_date: '', assigned_to: '' });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const openEditModal = (task: ApiTask) => {
+    setEditingTask(task);
+    setEditForm({
+      title: task.title,
+      importance: task.importance || 'medium',
+      due_date: task.due_date || '',
+      assigned_to: task.assigned_to ? String(task.assigned_to) : '',
+    });
+  };
+
+  const handleEditTask = async () => {
+    if (!tripId || !editingTask || !editForm.title.trim()) return;
+    try {
+      const updated = await updateTask(tripId, editingTask.id, {
+        title: editForm.title,
+        importance: editForm.importance,
+        assigned_to: editForm.assigned_to ? Number(editForm.assigned_to) : null,
+        due_date: editForm.due_date || null,
+      });
+      setTasks(tasks.map((t) => (t.id === editingTask.id ? updated : t)));
+      setEditingTask(null);
     } catch (err) {
       console.error(err);
     }
@@ -239,16 +274,13 @@ const KanbanPage = () => {
                   {colTasks.map((task) => {
                     const assigneeName = getMemberName(task.assigned_to);
                     return (
-                      <div
-                        key={task.id}
-                        className="rounded-xl border border-gray-200 bg-white p-4"
-                      >
+                      <div key={task.id} onClick={() => openEditModal(task)} className="cursor-pointer rounded-xl border border-gray-200 bg-white p-4 transition hover:shadow-md">
                         <div className="mb-1 flex items-center justify-between">
                           <span className="font-semibold text-gray-900">
                             {task.title}
                           </span>
                           <button
-                            onClick={() => handleDeleteTask(task.id)}
+                            onClick={(e) => { e.stopPropagation(); handleDeleteTask(task.id); }}
                             className="text-sm text-gray-400 transition hover:text-red-500"
                           >
                             ✕
@@ -314,16 +346,13 @@ const KanbanPage = () => {
             .map((task) => {
               const assigneeName = getMemberName(task.assigned_to);
               return (
-                <div
-                  key={task.id}
-                  className="rounded-xl border border-gray-200 bg-white p-4"
-                >
+                <div key={task.id} onClick={() => openEditModal(task)} className="cursor-pointer rounded-xl border border-gray-200 bg-white p-4 transition hover:shadow-md">
                   <div className="mb-1 flex items-center justify-between">
                     <span className="font-semibold text-gray-900">
                       {task.title}
                     </span>
                     <button
-                      onClick={() => handleDeleteTask(task.id)}
+                      onClick={(e) => { e.stopPropagation(); handleDeleteTask(task.id); }}
                       className="text-sm text-gray-400 transition hover:text-red-500"
                     >
                       ✕
@@ -413,9 +442,32 @@ const KanbanPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Due Date
-                  </label>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Importance</label>
+                  <select
+                    value={newTask.importance}
+                    onChange={(e) => setNewTask({ ...newTask, importance: e.target.value })}
+                    className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none focus:border-[#3d3d5e]"
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Assign to</label>
+                  <select
+                    value={newTask.assigned_to}
+                    onChange={(e) => setNewTask({ ...newTask, assigned_to: e.target.value })}
+                    className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none focus:border-[#3d3d5e]"
+                  >
+                    <option value="">Unassigned</option>
+                    {members.map((m) => (
+                      <option key={m.id} value={m.id}>{m.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Due Date</label>
                   <input
                     type="date"
                     value={newTask.due_date}
@@ -561,11 +613,75 @@ const KanbanPage = () => {
           </div>
         )}
 
-        <img
-          src="/vehicles/Union.svg"
-          alt=""
-          className="pointer-events-none fixed right-10 bottom-10 hidden h-40 w-auto opacity-10 grayscale md:block"
-        />
+        {editingTask && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setEditingTask(null)}>
+            <div className="w-[400px] rounded-2xl bg-white p-8" onClick={(e) => e.stopPropagation()}>
+              <h2 className="mb-6 text-xl font-bold text-gray-900">Edit Task</h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Title *</label>
+                  <input
+                    type="text"
+                    value={editForm.title}
+                    onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                    autoFocus
+                    className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none focus:border-[#3d3d5e]"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Importance</label>
+                  <select
+                    value={editForm.importance}
+                    onChange={(e) => setEditForm({ ...editForm, importance: e.target.value })}
+                    className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none focus:border-[#3d3d5e]"
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Assign to</label>
+                  <select
+                    value={editForm.assigned_to}
+                    onChange={(e) => setEditForm({ ...editForm, assigned_to: e.target.value })}
+                    className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none focus:border-[#3d3d5e]"
+                  >
+                    <option value="">Unassigned</option>
+                    {members.map((m) => (
+                      <option key={m.id} value={m.id}>{m.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Due Date</label>
+                  <input
+                    type="date"
+                    value={editForm.due_date}
+                    onChange={(e) => setEditForm({ ...editForm, due_date: e.target.value })}
+                    className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none focus:border-[#3d3d5e]"
+                  />
+                </div>
+              </div>
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  onClick={() => setEditingTask(null)}
+                  className="rounded-full border border-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleEditTask}
+                  className="rounded-full bg-[#3d3d5e] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#2f2f4a]"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <img src="/vehicles/Union.svg" alt="" className="fixed bottom-10 right-10 hidden h-40 w-auto opacity-10 grayscale pointer-events-none md:block" />
       </main>
 
       <nav className="fixed bottom-0 left-0 z-50 flex w-full border-t border-gray-200 bg-white md:hidden">

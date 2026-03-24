@@ -39,6 +39,7 @@ export const useAuth = () => {
     try {
       const response = await login(data).unwrap();
       dispatch(setToken(response.token));
+      localStorage.setItem('auth_user', JSON.stringify(response.user));
       navigate(redirectPath, { replace: true });
     } catch (err: any) {
       const errorMessage = err?.data?.message || 'Authentication error';
@@ -53,6 +54,7 @@ export const useAuth = () => {
     try {
       const response = await register(data).unwrap();
       dispatch(setToken(response.token));
+      localStorage.setItem('auth_user', JSON.stringify(response.user));
       navigate(redirectPath, { replace: true });
     } catch (err: any) {
       const errorMessage = err?.data?.message || 'Registration error';

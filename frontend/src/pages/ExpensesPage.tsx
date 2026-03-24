@@ -1,12 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
-import {
-  getTrip,
-  getTripExpenses,
-  createExpense,
-  type Trip,
-  type Expense,
-} from '../api';
+import { getTrip, getTripExpenses, createExpense, deleteExpense, type Trip, type Expense } from '../api';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
 const sidebarItems = [
@@ -24,13 +18,7 @@ const ExpensesPage = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [newExpense, setNewExpense] = useState({
-    title: '',
-    total_amount: 0,
-    currency: 'USD',
-    paid_by: 1,
-    splits: [1],
-  });
+  const [newExpense, setNewExpense] = useState({ title: '', total_amount: 0, currency: 'USD', paid_by: 0, splits: [] as number[] });
 
   useEffect(() => {
     if (!tripId) return;
@@ -62,11 +50,19 @@ const ExpensesPage = () => {
       console.error(err);
     }
   };
+  const handleDeleteExpense = async (expenseId: string) => {
+  if (!tripId) return;
+  try {
+    await deleteExpense(tripId, expenseId);
+    setExpenses(expenses.filter((e) => e.id !== expenseId));
+  } catch (err) {
+    console.error(err);
+  }
+};
 
-  const globalAmount = expenses.reduce(
-    (sum, e) => sum + parseFloat(e.total_amount),
-    0,
-  );
+const globalAmount = expenses.reduce((sum, e) => sum + parseFloat(e.total_amount), 0);
+const budgetRemaining = trip ? parseFloat(trip.budget_amount) - globalAmount : 0;
+
 
   const chartData = expenses.map((e) => ({
     name: e.title,
@@ -130,6 +126,10 @@ const ExpensesPage = () => {
             <span>Global Amount</span>
             <span>{globalAmount.toFixed(2)}</span>
           </div>
+          <div className="flex flex-1 items-center justify-between rounded-xl bg-[#3d3d5e] px-4 py-3 text-sm font-semibold text-white md:px-6 md:text-base">
+            <span>Budget Left</span>
+            <span>{budgetRemaining.toFixed(2)} {trip?.budget_currency || ''}</span>
+          </div>
           <div
             onClick={() => setShowForm(true)}
             className="flex flex-1 cursor-pointer items-center justify-between rounded-xl bg-[#3d3d5e] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#2f2f4a] md:px-6 md:text-base"
@@ -171,22 +171,30 @@ const ExpensesPage = () => {
             {expenses.length === 0 ? (
               <p className="text-sm text-gray-400">No expenses yet</p>
             ) : (
-              expenses.map((expense) => (
+              expenses.map((expense, index) => (
                 <div key={expense.id}>
-                  <p className="mb-1 text-sm font-medium text-gray-700">
-                    {expense.title}
-                  </p>
-                  <div className="flex items-center justify-between rounded-xl bg-[#eeeef8] px-5 py-3">
-                    <span className="text-sm font-semibold text-gray-900">
-                      Total: {expense.total_amount} {expense.currency}
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      {new Date(expense.date).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
-                    </span>
+                  <div className="mb-1 flex items-center justify-between">
+                    <p className="text-sm font-medium text-gray-700">{expense.title}</p>
+                    <button
+                      onClick={() => handleDeleteExpense(expense.id)}
+                      className="text-xs text-gray-400 transition hover:text-red-500"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div
+                    className="rounded-xl px-5 py-3"
+                    style={{ backgroundColor: `${CHART_COLORS[index % CHART_COLORS.length]}20`, borderLeft: `4px solid ${CHART_COLORS[index % CHART_COLORS.length]}` }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-gray-900">
+                        Total: {expense.total_amount} {expense.currency}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        {new Date(expense.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                    </div>
+                  </div>
                   </div>
                 </div>
               ))
