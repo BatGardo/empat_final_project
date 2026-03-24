@@ -15,6 +15,16 @@ const statusStyle = (status: string) => {
   }
 };
 
+const getTripStatus = (trip: Trip) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const start = new Date(trip.start_date);
+  const end = new Date(trip.end_date);
+  if (today > end) return 'Done';
+  if (today >= start && today <= end) return 'In Progress';
+  return 'Planning';
+};
+
 const formatDate = (start: string, end: string) => {
   const s = new Date(start);
   const e = new Date(end);
@@ -71,7 +81,6 @@ const DashboardPage = () => {
 
   return (
     <div className="min-h-[calc(100vh-57px)] bg-[#f9f9fb] px-8 py-6">
-      {/* Header */}
       <div className="mb-2 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
         <div className="flex items-center gap-3">
@@ -90,7 +99,6 @@ const DashboardPage = () => {
       <h2 className="mb-4 text-base font-medium text-gray-900">My Trips</h2>
 
       <div className="flex items-start gap-6">
-        {/* Trips Grid in white block */}
         <div className="flex-1 rounded-xl bg-white p-5">
           {trips.length === 0 ? (
             <p className="py-8 text-center text-gray-400">No trips yet</p>
@@ -102,17 +110,15 @@ const DashboardPage = () => {
                   onClick={() => navigate(`/travel/${trip.id}/team`)}
                   className="cursor-pointer rounded-xl border border-gray-200 bg-white transition hover:shadow-md"
                 >
-                  {/* Image placeholder with status */}
                   <div className="relative h-36 rounded-t-xl bg-[#dde2f0]">
                     {trip.cover_image_url && (
                       <img src={trip.cover_image_url} alt="" className="h-full w-full rounded-t-xl object-cover" />
                     )}
-                    <span className={`absolute top-3 right-3 rounded border bg-white px-3 py-0.5 text-xs font-medium border-gray-400 text-gray-400`}>
-                      Planning
+                    <span className={`absolute top-3 right-3 rounded border bg-white px-3 py-0.5 text-xs font-medium ${statusStyle(getTripStatus(trip))}`}>
+                      {getTripStatus(trip)}
                     </span>
                   </div>
 
-                  {/* Info */}
                   <div className="p-4">
                     <h3 className="mb-2 font-semibold text-gray-900">{trip.title}</h3>
                     <div className="mb-1 flex items-center gap-2 text-sm text-gray-400">
@@ -134,9 +140,7 @@ const DashboardPage = () => {
           )}
         </div>
 
-        {/* Right Sidebar */}
         <div className="w-72 space-y-6">
-          {/* Notifications */}
           <div className="rounded-xl border border-gray-200 bg-white p-5">
             <h3 className="mb-4 text-base font-bold text-gray-900">Notifications</h3>
             {notifications.length === 0 ? (
@@ -157,7 +161,6 @@ const DashboardPage = () => {
             )}
           </div>
 
-          {/* Soon to do */}
           <div className="rounded-xl border border-gray-200 bg-white p-5">
             <h3 className="mb-4 text-base font-bold text-gray-900">Soon to do</h3>
             {deadlines.length === 0 ? (
@@ -183,7 +186,6 @@ const DashboardPage = () => {
         </div>
       </div>
 
-      {/* Create Trip Modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowForm(false)}>
           <div className="w-[450px] rounded-2xl bg-white p-8" onClick={(e) => e.stopPropagation()}>
