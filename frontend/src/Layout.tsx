@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { tokenStorage } from './token/tokenStorage';
 
 const Layout = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -9,12 +8,6 @@ const Layout = () => {
   const handleNavigation = (path: string) => {
     setIsMenuOpen(false);
     navigate(path);
-  };
-
-  const handleLogout = () => {
-    tokenStorage.remove();
-    setIsMenuOpen(false);
-    navigate('/');
   };
 
   return (
