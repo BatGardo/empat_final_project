@@ -39,34 +39,38 @@ The project mostly follows the default Laravel structure, which is commonly used
     Models → interact with the database
     Routes → define the API endpoints
 
-🔗 Core Functionality
-    👤 Authentication
-        User registration & login
-        Token-based authentication (Sanctum)
-    🌍 Trips
-        Create and manage trips
-        Add/remove participants
-        Store trip-related data
-    📋 Tasks
-        Create tasks inside trips
-        Assign tasks to users
-        Track completion status
-    ⏰ Deadlines
-        Tasks can have due dates
+## 🔗 Core Functionality
 
-🗄️ Database
-    PostgreSQL (Render hosted)
-    Managed via Laravel migrations
+### 👤 Authentication
+- User registration & login  
+- Token-based authentication (Sanctum)
 
-🔐 Authentication
-    Token-based authentication for API access
-    Secured endpoints using middleware
+### 🌍 Trips
+- Create and manage trips  
+- Add/remove participants  
+- Store trip-related data  
 
-📦 Deployment
-    Containerized with Docker
-    Deployed on Render
-    Connected to managed PostgreSQL instance
+### 📋 Tasks
+- Create tasks inside trips  
+- Assign tasks to users  
+- Track completion status  
 
-👨‍💻 Backend Team
-    Ihor Syniaiev - Backend Developer / DevOps / Team Lead
-    Uliana Sova - Backend Developer / Designer
+### ⏰ Deadlines
+- Tasks can have due dates  
+
+## 🗄️ Database
+- PostgreSQL (Render hosted)  
+- Managed via Laravel migrations  
+
+## 🔐 Authentication
+- Token-based authentication for API access  
+- Secured endpoints using middleware  
+
+## 📦 Deployment
+- Containerized with Docker  
+- Deployed on Render  
+- Connected to managed PostgreSQL instance  
+
+## 👨‍💻 Backend Team
+- Ihor Syniaiev — Backend Developer / DevOps / Team Lead  
+- Uliana Sova — Backend Developer / Designer  
