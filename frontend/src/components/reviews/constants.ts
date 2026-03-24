@@ -11,7 +11,7 @@ export const reviews: ReviewType[] = [
   {
     id: 1,
     name: 'Sarah T.',
-    text: 'Splitting the cost used to take hours. Now we just enter the amount and the app calculates everything automatically. LOVE IT.',
+    text: 'Splitting the cost used to take hours. Now the app calculates everything automatically. LOVE IT.',
     avatar: avatar,
   },
   {
@@ -34,8 +34,8 @@ export const reviews: ReviewType[] = [
   },
   {
     id: 5,
-    name: 'Elena R.',
-    text: "It completely stopped the endless 'who is doing what' questions in our group chat.",
+    name: 'Zoe T.',
+    text: 'Absolutely love this app! Highly recommend!',
     avatar: avatar,
   },
   {
@@ -52,8 +52,8 @@ export const reviews: ReviewType[] = [
   },
   {
     id: 8,
-    name: 'Elena R.',
-    text: "It completely stopped the endless 'who is doing what' questions in our group chat.",
+    name: 'Michael A.',
+    text: 'A real lifesaver for organizing shared vacations. The interface is clean and intuitive.',
     avatar: avatar,
   },
 ];

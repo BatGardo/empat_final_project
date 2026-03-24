@@ -72,7 +72,7 @@ const Header = () => {
             <>
               <button
                 onClick={() => handleNavigation('/dashboard')}
-                className="font-headings text-headings flex h-12 w-full items-center justify-between rounded-lg bg-gray-50 px-4 text-lg font-bold hover:bg-gray-100"
+                className="text-text-default flex h-12 w-full items-center justify-between rounded-lg bg-gray-50 px-4 font-bold hover:bg-gray-100"
               >
                 Dashboard
                 <img
@@ -90,11 +90,11 @@ const Header = () => {
             <>
               <LoginButton
                 onAction={closeMenu}
-                className="flex h-12 w-full items-center justify-center rounded-lg"
+                className="text-text-default flex h-12 w-full items-center justify-between rounded-lg bg-gray-50 px-4 font-bold hover:bg-gray-100"
               />
               <SignupButton
                 onAction={closeMenu}
-                className="flex h-12 w-full items-center justify-center rounded-lg"
+                className="bg-primary hover:bg-hover-violet flex h-12 w-full items-center justify-center rounded-lg text-base font-semibold text-white transition-colors"
               />
             </>
           )}

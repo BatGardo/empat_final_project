@@ -43,7 +43,7 @@ const HomePage = () => {
             Organize Group Travel Faster <br /> With Baza Grunt Osnova
           </h1>
 
-          <p className="mb-8 max-w-[590px] justify-self-center text-base text-balance lg:text-2xl">
+          <p className="mx-auto mb-8 max-w-[590px] text-base text-balance lg:text-2xl">
             The essential tool for organizing shared trips. Create a group,
             share the invite link, and manage tasks and expenses together in one
             place.
@@ -135,7 +135,7 @@ const HomePage = () => {
       {/*Start planning*/}
       <section className="bg-gray-50 px-5 py-16 md:px-30">
         <div className="mx-auto w-full max-w-7xl">
-          <div className="flex flex-col overflow-hidden rounded-[2.5rem] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] md:flex-row">
+          <div className="flex flex-col overflow-hidden rounded-3xl bg-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] md:flex-row">
             <div className="order-2 flex flex-1 flex-col items-center justify-center p-10 text-center md:order-1 md:items-start md:p-16 md:text-left lg:p-20">
               <h2 className="font-headings mb-4 text-2xl font-bold text-gray-900 md:text-4xl">
                 Try Right Now

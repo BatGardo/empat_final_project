@@ -5,7 +5,7 @@ interface SignupButtonProps {
   className?: string;
 }
 
-const SignupButton = ({ onAction }: SignupButtonProps) => {
+const SignupButton = ({ onAction, className }: SignupButtonProps) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -18,7 +18,11 @@ const SignupButton = ({ onAction }: SignupButtonProps) => {
   return (
     <button
       onClick={handleClick}
-      className="bg-primary hover:bg-hover-violet rounded-full px-4 py-2 font-semibold text-white"
+      className={
+        className
+          ? className
+          : 'bg-primary hover:bg-hover-violet rounded-full px-4 py-2 text-base font-semibold text-white transition-colors'
+      }
     >
       Sign up
     </button>
