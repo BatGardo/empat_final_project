@@ -43,7 +43,7 @@ const HomePage = () => {
             Organize Group Travel Faster <br /> With Baza Grunt Osnova
           </h1>
 
-          <p className="mb-8 max-w-[590px] justify-self-center text-base text-balance lg:text-2xl">
+          <p className="mx-auto mb-8 max-w-[590px] text-base text-balance lg:text-2xl">
             The essential tool for organizing shared trips. Create a group,
             share the invite link, and manage tasks and expenses together in one
             place.
