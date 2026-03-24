@@ -119,10 +119,10 @@ const TravelPlanPage = () => {
         </div>
 
         <div className="space-y-6">
-          {daysList.map((day) => {
+          {daysList.map((day, dayIndex) => {
             const events = getEventsForDay(day);
             return (
-              <div key={day}>
+              <div key={`${day}-${dayIndex}`}>
                 <div className="mb-3 inline-block rounded border border-gray-300 bg-white px-4 py-1 text-sm font-medium text-gray-700">
                   {formatDateLabel(day)}
                 </div>

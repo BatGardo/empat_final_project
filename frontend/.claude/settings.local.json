@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(grep -rn \"{/\\\\*.*\\\\*/}\" src/pages/*.tsx src/Layout.tsx)",
-      "Bash(xargs grep:*)"
+      "Bash(xargs grep:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }
