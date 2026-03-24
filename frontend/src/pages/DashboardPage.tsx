@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getDashboard, createTrip, deleteTrip, acceptInvite, type Trip } from '../api';
+import { getDashboard, createTrip, acceptInvite, removeMember, getMe, type Trip } from '../api';
 
 const statusStyle = (status: string) => {
   switch (status) {
@@ -92,11 +92,13 @@ const DashboardPage = () => {
     budget_currency: 'USD',
   });
 
-  const handleDeleteTrip = async (tripId: string, e: React.MouseEvent) => {
+  const handleLeaveTrip = async (tripId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!window.confirm('Delete this trip?')) return;
+    if (!window.confirm('Leave this trip?')) return;
+    const me = getMe();
+    if (!me) return;
     try {
-      await deleteTrip(tripId);
+      await removeMember(tripId, me.id);
       setTrips(trips.filter((t) => t.id !== tripId));
     } catch (err) {
       console.error(err);
@@ -201,7 +203,7 @@ const DashboardPage = () => {
   {getTripStatus(trip)}
 </span>
 <button
-  onClick={(e) => handleDeleteTrip(trip.id, e)}
+  onClick={(e) => handleLeaveTrip(trip.id, e)}
   className="absolute top-3 right-3 rounded-full bg-white/80 px-2 py-0.5 text-xs text-gray-400 transition hover:bg-red-50 hover:text-red-500"
 >
   ×

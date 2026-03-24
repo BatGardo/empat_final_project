@@ -141,6 +141,11 @@ export async function acceptInvite(token: string): Promise<{ message: string; tr
   return res.json();
 }
 
+export async function removeMember(tripId: string, userId: number): Promise<void> {
+  const res = await authFetch(`${API_URL}/trips/${tripId}/members/${userId}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to remove member');
+}
+
 export async function deleteTrip(tripId: string): Promise<void> {
   const res = await authFetch(`${API_URL}/trips/${tripId}`, { method: 'DELETE' });
   if (!res.ok) throw new Error('Failed to delete trip');
@@ -256,6 +261,17 @@ export interface User {
 export function getMe(): User | null {
   const saved = localStorage.getItem('auth_user');
   return saved ? JSON.parse(saved) : null;
+}
+
+export async function updateMe(data: { name: string }): Promise<User> {
+  const res = await authFetch(`${API_URL}/me`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Failed to update user');
+  const result = await res.json();
+  localStorage.setItem('auth_user', JSON.stringify(result.user));
+  return result.user;
 }
 
 export async function getDashboard(): Promise<DashboardData> {

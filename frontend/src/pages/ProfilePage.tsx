@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { getMe } from '../api';
+import { getMe, updateMe } from '../api';
 import LogoutButton from '../components/logout-button/LogoutButton';
 
 const ProfilePage = () => {
@@ -7,11 +7,14 @@ const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(user?.name || '');
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (user && name.trim() && name !== user.name) {
-      const updated = { ...user, name: name.trim() };
-      localStorage.setItem('auth_user', JSON.stringify(updated));
-      window.location.reload();
+      try {
+        await updateMe({ name: name.trim() });
+        window.location.reload();
+      } catch (err) {
+        console.error(err);
+      }
     }
     setIsEditing(false);
   };

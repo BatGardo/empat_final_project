@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
-import { getTrip, updateTrip, getTripMembers, createInvite, getMe, type Trip, type Member } from '../api';
+import { getTrip, updateTrip, getTripMembers, createInvite, removeMember, deleteTrip, getMe, type Trip, type Member } from '../api';
 
 const sidebarItems = [
   { label: 'Team', icon: '/icons/team.svg', path: 'team' },
@@ -173,7 +173,19 @@ const TeamPage = () => {
               {trip ? formatDate(trip.start_date, trip.end_date) : 'Loading...'}
             </span>
           </div>
-          <div className="flex flex-1 cursor-pointer items-center justify-between rounded-xl bg-[#3d3d5e] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#2f2f4a] md:px-6 md:text-base">
+          <div
+            onClick={async () => {
+              if (!tripId) return;
+              try {
+                const data = await createInvite(tripId);
+                await navigator.clipboard.writeText(data.accept_api_url);
+                alert('Invite link copied!');
+              } catch (err) {
+                console.error(err);
+              }
+            }}
+            className="flex flex-1 cursor-pointer items-center justify-between rounded-xl bg-[#3d3d5e] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#2f2f4a] md:px-6 md:text-base"
+          >
             <span>Copy Invitation Note</span>
             <img src="/icons/copy.svg" alt="" className="h-5 w-5" />
           </div>
@@ -198,10 +210,16 @@ const TeamPage = () => {
                   <span className="text-sm text-gray-400">You</span>
                 ) : (
                   <button
-                    onClick={() =>
-                      setMembers(members.filter((m) => m.id !== member.id))
-                    }
-                    className="text-sm text-gray-400 transition hover:text-gray-700"
+                    onClick={async () => {
+                      if (!tripId || !window.confirm(`Remove ${member.name}?`)) return;
+                      try {
+                        await removeMember(tripId, member.id);
+                        setMembers(members.filter((m) => m.id !== member.id));
+                      } catch (err) {
+                        console.error(err);
+                      }
+                    }}
+                    className="text-sm text-gray-400 transition hover:text-red-500"
                   >
                     ✕
                   </button>
@@ -228,6 +246,23 @@ const TeamPage = () => {
             )}
           </div>
         </div>
+        <div className="mt-6">
+          <button
+            onClick={async () => {
+              if (!tripId || !window.confirm('Are you sure you want to delete this trip? This cannot be undone.')) return;
+              try {
+                await deleteTrip(tripId);
+                window.location.href = '/dashboard';
+              } catch (err) {
+                console.error(err);
+              }
+            }}
+            className="rounded-full border border-red-300 px-5 py-2 text-sm font-medium text-red-500 transition hover:bg-red-50"
+          >
+            Delete Trip
+          </button>
+        </div>
+
         {showInvite && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowInvite(false)}>
             <div className="w-[400px] rounded-2xl bg-white p-8" onClick={(e) => e.stopPropagation()}>
