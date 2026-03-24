@@ -15,12 +15,21 @@ const LoginButton = ({ onAction, className }: LoginButtonProps) => {
     }
   };
 
+  const isMobile = !!className;
+
   return (
     <button
       onClick={handleClick}
       className={className ? className : 'text-base'}
     >
       Log in
+      {isMobile && (
+        <img
+          src="/icons/chevron.svg"
+          alt="Go"
+          className="-rotate-90 opacity-50"
+        />
+      )}
     </button>
   );
 };
