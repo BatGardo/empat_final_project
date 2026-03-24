@@ -13,7 +13,7 @@ const Input = ({ label, error, required, ...props }: InputProps) => {
   return (
     <div className="mb-3">
       {label && (
-        <label htmlFor={inputId} className="mb-2 block justify-self-start">
+        <label htmlFor={inputId} className="mb-2 block text-left">
           {label}
           {required && <p className="text-red-600"></p>}
         </label>
@@ -31,9 +31,7 @@ const Input = ({ label, error, required, ...props }: InputProps) => {
       ></input>
 
       {error && (
-        <p className="mt-2 block justify-self-start text-sm text-red-600">
-          {error}
-        </p>
+        <p className="mt-2 block text-left text-sm text-red-600">{error}</p>
       )}
     </div>
   );

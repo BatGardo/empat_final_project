@@ -15,6 +15,7 @@ const LoginPage = () => {
     formState: { errors },
   } = useForm<LoginInterface>({
     resolver: yupResolver(loginSchema),
+    mode: 'onTouched',
   });
 
   const { handleLogin, isLoginLoading } = useAuth();

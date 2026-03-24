@@ -1,6 +1,5 @@
 import LoginButton from '../login-button/LoginButton';
 import SignupButton from '../signup-button/SignupButton';
-import LogoutButton from '../logout-button/LogoutButton';
 import { useAuth } from '../../hooks/useAuth';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
@@ -19,8 +18,8 @@ const Header = () => {
   };
 
   return (
-    <header className="shadow-shadow border-0.3 sticky top-0 z-50 border-y border-gray-200 bg-white">
-      <div className="mx-auto grid h-16 w-full max-w-7xl grid-cols-2 px-5 md:px-8">
+    <header className="shadow-shadow border-0.3 sticky top-0 z-50 border-y border-gray-200 bg-white px-5 md:px-30">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between">
         {/*Logo*/}
         <div
           className="flex cursor-pointer gap-3 self-center"
@@ -38,17 +37,16 @@ const Header = () => {
             <div className="flex items-center gap-6">
               <button
                 onClick={() => handleNavigation('/dashboard')}
-                className="font-headings text-headings hover:text-primary font-semibold transition-colors"
+                className="text-headings hover:text-primary font-semibold transition-colors"
               >
                 Dashboard
               </button>
               <button
                 onClick={() => handleNavigation('/profile')}
-                className="font-headings text-headings hover:text-primary font-semibold transition-colors"
+                className="text-headings hover:text-primary font-semibold transition-colors"
               >
                 Profile
               </button>
-              <LogoutButton className="bg-primary hover:bg-hover-violet rounded-full px-5 py-2 font-medium text-white transition-colors" />
             </div>
           ) : (
             <div className="my-2.5 flex items-center gap-3">
@@ -89,7 +87,7 @@ const Header = () => {
               </button>
               <button
                 onClick={() => handleNavigation('/profile')}
-                className="font-headings text-headings flex h-12 w-full items-center justify-between rounded-lg bg-gray-50 px-4 text-lg font-bold hover:bg-gray-100"
+                className="text-text-default flex h-12 w-full items-center justify-between rounded-lg bg-gray-50 px-4 font-bold hover:bg-gray-100"
               >
                 Profile
                 <img
@@ -98,10 +96,6 @@ const Header = () => {
                   className="-rotate-90 opacity-50"
                 />
               </button>
-              <LogoutButton
-                onAction={closeMenu}
-                className="bg-primary hover:bg-hover-violet flex h-12 w-full items-center justify-center rounded-lg text-base font-semibold text-white transition-colors"
-              />
             </>
           ) : (
             <>

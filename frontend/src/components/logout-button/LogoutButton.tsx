@@ -17,7 +17,7 @@ const LogoutButton = ({ onAction, className }: LogoutButtonProps) => {
 
   return (
     <button onClick={handleClick} className={className}>
-      Logout
+      Log out
     </button>
   );
 };

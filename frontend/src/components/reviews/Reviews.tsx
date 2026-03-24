@@ -18,7 +18,7 @@ const Reviews = () => {
           <div className="mt-8 text-center md:hidden">
             <button
               onClick={() => setShowAll(true)}
-              className="font-headings text-text-secondary font-medium hover:text-gray-800"
+              className="bg-primary hover:bg-hover-violet rounded-full px-4 py-2 text-base font-semibold text-white transition-colors"
             >
               See more reviews
             </button>
