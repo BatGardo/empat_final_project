@@ -140,7 +140,7 @@ const budgetRemaining = trip ? parseFloat(trip.budget_amount) - globalAmount : 0
         </div>
 
         <div className="flex flex-col gap-6 md:flex-row">
-          <div className="mx-auto flex h-64 w-64 items-center justify-center rounded-xl bg-white p-4 shadow-sm">
+          <div className="mx-auto flex h-64 w-64 min-h-[256px] min-w-[256px] items-center justify-center rounded-xl bg-white p-4 shadow-sm">
             {chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -194,7 +194,6 @@ const budgetRemaining = trip ? parseFloat(trip.budget_amount) - globalAmount : 0
                         {new Date(expense.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </span>
                     </div>
-                  </div>
                   </div>
                 </div>
               ))

@@ -17,7 +17,6 @@ const TeamPage = () => {
   const [editTitle, setEditTitle] = useState('');
   const [loading, setLoading] = useState(true);
   const [showInvite, setShowInvite] = useState(false);
-  const [inviteToken, setInviteToken] = useState('');
   const [inviteUrl, setInviteUrl] = useState('');
 
   useEffect(() => {
@@ -216,7 +215,6 @@ const TeamPage = () => {
                   if (!tripId) return;
                   try {
                     const data = await createInvite(tripId);
-                    setInviteToken(data.invite_token);
                     setInviteUrl(data.accept_api_url);
                     setShowInvite(true);
                   } catch (err) {
