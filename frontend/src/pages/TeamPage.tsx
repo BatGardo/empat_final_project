@@ -178,7 +178,7 @@ const TeamPage = () => {
               if (!tripId) return;
               try {
                 const data = await createInvite(tripId);
-                await navigator.clipboard.writeText(data.accept_api_url);
+                await navigator.clipboard.writeText(data.invite_token);
                 alert('Invite link copied!');
               } catch (err) {
                 console.error(err);
@@ -233,7 +233,7 @@ const TeamPage = () => {
                   if (!tripId) return;
                   try {
                     const data = await createInvite(tripId);
-                    setInviteUrl(data.accept_api_url);
+                    setInviteUrl(data.invite_token);
                     setShowInvite(true);
                   } catch (err) {
                     console.error(err);
