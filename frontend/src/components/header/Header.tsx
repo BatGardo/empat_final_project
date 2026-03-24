@@ -42,6 +42,12 @@ const Header = () => {
               >
                 Dashboard
               </button>
+              <button
+                onClick={() => handleNavigation('/profile')}
+                className="font-headings text-headings hover:text-primary font-semibold transition-colors"
+              >
+                Profile
+              </button>
               <LogoutButton className="bg-primary hover:bg-hover-violet rounded-full px-5 py-2 font-medium text-white transition-colors" />
             </div>
           ) : (
@@ -75,6 +81,17 @@ const Header = () => {
                 className="text-text-default flex h-12 w-full items-center justify-between rounded-lg bg-gray-50 px-4 font-bold hover:bg-gray-100"
               >
                 Dashboard
+                <img
+                  src="/icons/chevron.svg"
+                  alt="Go"
+                  className="-rotate-90 opacity-50"
+                />
+              </button>
+              <button
+                onClick={() => handleNavigation('/profile')}
+                className="font-headings text-headings flex h-12 w-full items-center justify-between rounded-lg bg-gray-50 px-4 text-lg font-bold hover:bg-gray-100"
+              >
+                Profile
                 <img
                   src="/icons/chevron.svg"
                   alt="Go"

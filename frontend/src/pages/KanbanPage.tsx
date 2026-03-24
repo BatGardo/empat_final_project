@@ -30,7 +30,8 @@ const KanbanPage = () => {
   const [selectedTaskId, setSelectedTaskId] = useState<string>('');
   const [selectedDoneTaskId, setSelectedDoneTaskId] = useState<string>('');
   const [selectedMemberId, setSelectedMemberId] = useState<string>('');
-  const [newTask, setNewTask] = useState({ title: '', description: '', notes: '' });
+  const [newTask, setNewTask] = useState({ title: '', description: '', notes: '', due_date: '' });
+  const [mobileStage, setMobileStage] = useState('To Do');
 
   useEffect(() => {
     if (!tripId) return;
@@ -60,10 +61,11 @@ const KanbanPage = () => {
         title: newTask.title,
         status: 'pending',
         importance: 'medium',
+        ...(newTask.due_date ? { due_date: newTask.due_date } : {}),
       });
       setTasks([...tasks, created]);
       setShowForm(false);
-      setNewTask({ title: '', description: '', notes: '' });
+      setNewTask({ title: '', description: '', notes: '', due_date: '' });
     } catch (err) {
       console.error(err);
     }
@@ -122,7 +124,7 @@ const KanbanPage = () => {
 
   return (
     <div className="flex min-h-[calc(100vh-57px)]">
-      <aside className="w-60 border-r border-gray-200 bg-white px-4 py-6">
+      <aside className="hidden w-60 border-r border-gray-200 bg-white px-4 py-6 md:block">
         <NavLink to="/dashboard" className="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900">
           &lt; Back
         </NavLink>
@@ -147,33 +149,48 @@ const KanbanPage = () => {
         </nav>
       </aside>
 
-      <main className="relative flex-1 bg-[#f9f9fb] p-8">
-        <div className="mb-2 flex items-center justify-between">
+      <main className="relative flex-1 bg-[#f9f9fb] p-4 pb-20 md:p-8">
+        <div className="mb-4 flex flex-col items-center md:mb-2 md:flex-row md:justify-between">
           <div className="flex items-center gap-3">
-            <img src="/vehicles/hot-air-balloon.svg" alt="" className="h-[100px] w-auto opacity-20 grayscale" />
-            <h1 className="text-2xl font-bold text-gray-900">Kanban Board</h1>
+            <img src="/vehicles/hot-air-balloon.svg" alt="" className="hidden h-[100px] w-auto opacity-20 grayscale md:block" />
+            <h1 className="text-xl font-bold text-gray-900 md:text-2xl">
+              <span className="md:hidden">{trip?.title} </span>Kanban Board
+            </h1>
           </div>
+        </div>
+
+        <div className="mb-4 flex flex-wrap items-center justify-center gap-2 border-b border-gray-200 pb-4 md:mb-6 md:justify-end md:gap-3">
           <button
             onClick={() => setShowForm(true)}
             className="rounded-full bg-[#3d3d5e] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#2f2f4a]"
           >
             Add task
           </button>
+          <button className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            ☰ Sort by
+          </button>
+          <button className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            Filter
+          </button>
         </div>
 
-        <div className="mb-6 flex items-center justify-between border-b border-gray-200 pb-4">
-          <div />
-          <div className="flex items-center gap-3">
-            <button className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-              ☰ Sort by
+        <div className="mb-4 flex gap-2 md:hidden">
+          {columnNames.map((name) => (
+            <button
+              key={name}
+              onClick={() => setMobileStage(name)}
+              className={`flex-1 rounded-full py-2.5 text-sm font-medium transition ${
+                mobileStage === name
+                  ? 'bg-[#3d3d5e] text-white'
+                  : 'border border-gray-300 bg-white text-gray-600'
+              }`}
+            >
+              {name}
             </button>
-            <button className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-              Filter
-            </button>
-          </div>
+          ))}
         </div>
 
-        <div className="flex gap-6">
+        <div className="hidden gap-6 md:flex">
           {columnNames.map((colName) => {
             const colTasks = tasks.filter((t) => statusMap[t.status] === colName);
             return (
@@ -247,6 +264,70 @@ const KanbanPage = () => {
           })}
         </div>
 
+        <div className="space-y-4 md:hidden">
+          {tasks
+            .filter((t) => statusMap[t.status] === mobileStage)
+            .map((task) => {
+              const assigneeName = getMemberName(task.assigned_to);
+              return (
+                <div key={task.id} className="rounded-xl border border-gray-200 bg-white p-4">
+                  <div className="mb-1 flex items-center justify-between">
+                    <span className="font-semibold text-gray-900">{task.title}</span>
+                    <button
+                      onClick={() => handleDeleteTask(task.id)}
+                      className="text-sm text-gray-400 transition hover:text-red-500"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <p className="mb-1 text-xs text-gray-400">Importance: {task.importance}</p>
+                  <div className="mb-3 border-b border-gray-200" />
+                  <div className="flex items-center gap-3">
+                    {assigneeName ? (
+                      <>
+                        <div className="h-8 w-8 rounded-full bg-gray-300" />
+                        <span className="text-xs text-gray-600">{assigneeName}</span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="h-8 w-8 rounded-full border-2 border-dashed border-gray-300" />
+                        <span className="text-xs text-gray-400">To be assign</span>
+                      </>
+                    )}
+                    <span className="ml-auto flex items-center gap-1 text-xs text-gray-400">
+                      <img src="/icons/date.svg" alt="" className="h-4 w-4" />
+                      {task.due_date
+                        ? new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                        : 'No date'}
+                    </span>
+                  </div>
+                  {mobileStage === 'To Do' && (
+                    <button
+                      onClick={() => {
+                        setSelectedTaskId(task.id);
+                        setShowMoveForm(true);
+                      }}
+                      className="mt-3 w-full rounded-lg bg-[#eeeef8] py-2 text-xs font-medium text-[#3d3d5e] transition hover:bg-[#e4e4f0]"
+                    >
+                      Move to Doing →
+                    </button>
+                  )}
+                  {mobileStage === 'Doing' && (
+                    <button
+                      onClick={() => {
+                        setSelectedDoneTaskId(task.id);
+                        setShowDoneForm(true);
+                      }}
+                      className="mt-3 w-full rounded-lg bg-[#eeeef8] py-2 text-xs font-medium text-[#3d3d5e] transition hover:bg-[#e4e4f0]"
+                    >
+                      Move to Done ✓
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+        </div>
+
         {showForm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowForm(false)}>
             <div className="w-[400px] rounded-2xl bg-white p-8" onClick={(e) => e.stopPropagation()}>
@@ -260,6 +341,15 @@ const KanbanPage = () => {
                     onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
                     placeholder="Task name"
                     autoFocus
+                    className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none focus:border-[#3d3d5e]"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Due Date</label>
+                  <input
+                    type="date"
+                    value={newTask.due_date}
+                    onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value })}
                     className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none focus:border-[#3d3d5e]"
                   />
                 </div>
@@ -367,8 +457,25 @@ const KanbanPage = () => {
           </div>
         )}
 
-        <img src="/vehicles/Union.svg" alt="" className="fixed bottom-10 right-10 h-40 w-auto opacity-10 grayscale pointer-events-none" />
+        <img src="/vehicles/Union.svg" alt="" className="fixed bottom-10 right-10 hidden h-40 w-auto opacity-10 grayscale pointer-events-none md:block" />
       </main>
+
+      <nav className="fixed bottom-0 left-0 z-50 flex w-full border-t border-gray-200 bg-white md:hidden">
+        {sidebarItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={`/travel/${tripId}/${item.path}`}
+            className={({ isActive }) =>
+              `flex flex-1 flex-col items-center gap-1 py-3 text-xs font-medium transition ${
+                isActive ? 'text-[#3d3d5e]' : 'text-gray-400'
+              }`
+            }
+          >
+            <img src={item.icon} alt={item.label} className="h-5 w-5" />
+            {item.label}
+          </NavLink>
+        ))}
+      </nav>
     </div>
   );
 };
