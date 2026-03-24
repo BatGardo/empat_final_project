@@ -115,6 +115,11 @@ export async function createTrip(data: { title: string; destination: string; sta
   return res.json();
 }
 
+export async function deleteTrip(tripId: string): Promise<void> {
+  const res = await authFetch(`${API_URL}/trips/${tripId}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to delete trip');
+}
+
 // Tasks
 
 export interface ApiTask {
@@ -136,7 +141,7 @@ export async function getTripTasks(tripId: string): Promise<ApiTask[]> {
   return res.json();
 }
 
-export async function createTask(tripId: string, data: { title: string; status: string; importance: string; assigned_to?: number | null }): Promise<ApiTask> {
+export async function createTask(tripId: string, data: { title: string; status: string; importance: string; assigned_to?: number | null; due_date?: string }): Promise<ApiTask> {
   const res = await authFetch(`${API_URL}/trips/${tripId}/tasks`, {
     method: 'POST',
     body: JSON.stringify(data),

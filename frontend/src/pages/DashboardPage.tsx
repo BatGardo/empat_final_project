@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getDashboard, createTrip, type Trip } from '../api';
+import { getDashboard, createTrip, deleteTrip, type Trip } from '../api';
 
 const statusStyle = (status: string) => {
   switch (status) {
@@ -35,8 +35,7 @@ const formatDate = (start: string, end: string) => {
 const DashboardPage = () => {
   const navigate = useNavigate();
   const [trips, setTrips] = useState<Trip[]>([]);
-  const [notifications, setNotifications] = useState<{ name: string; text: string }[]>([]);
-  const [deadlines, setDeadlines] = useState<{ title: string; name: string; date: string }[]>([]);
+  const [deadlines, setDeadlines] = useState<{ id: string; trip_id: string; title: string; status: string; due_date: string | null; assigned_to: number | null }[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [newTrip, setNewTrip] = useState({
@@ -47,6 +46,17 @@ const DashboardPage = () => {
     budget_amount: 0,
     budget_currency: 'USD',
   });
+
+  const handleDeleteTrip = async (tripId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!window.confirm('Delete this trip?')) return;
+    try {
+      await deleteTrip(tripId);
+      setTrips(trips.filter((t) => t.id !== tripId));
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleCreateTrip = async () => {
     if (!newTrip.title.trim()) return;
@@ -64,8 +74,7 @@ const DashboardPage = () => {
     getDashboard()
       .then((data) => {
         setTrips(data.trips || []);
-        setNotifications((data.notifications as { name: string; text: string }[]) || []);
-        setDeadlines((data.deadlines as { title: string; name: string; date: string }[]) || []);
+        setDeadlines(((data.deadlines as { id: string; trip_id: string; title: string; status: string; due_date: string | null; assigned_to: number | null }[]) || []).filter((d) => d.status !== 'completed'));
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -80,30 +89,35 @@ const DashboardPage = () => {
   }
 
   return (
-    <div className="min-h-[calc(100vh-57px)] bg-[#f9f9fb] px-8 py-6">
-      <div className="mb-2 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <div className="flex items-center gap-3">
+    <div className="min-h-[calc(100vh-57px)] bg-[#f9f9fb] px-4 py-4 md:px-8 md:py-6">
+      <div className="mb-4 flex flex-col items-center md:mb-2 md:flex-row md:justify-between">
+        <h1 className="text-xl font-bold text-gray-900 md:text-2xl">
+          <span className="md:hidden">My Trips </span>Dashboard
+        </h1>
+        <div className="mt-2 flex items-center gap-2 md:mt-0 md:gap-3">
           <button
             onClick={() => setShowForm(true)}
             className="rounded-full bg-[#3d3d5e] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#2f2f4a]"
           >
             Add trip
           </button>
-          <button className="rounded-full border border-gray-300 bg-white px-5 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
-            Modify
+          <button className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            ☰ Sort by
+          </button>
+          <button className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            Filter
           </button>
         </div>
       </div>
 
-      <h2 className="mb-4 text-base font-medium text-gray-900">My Trips</h2>
+      <h2 className="mb-4 text-lg font-bold text-gray-900 md:text-base md:font-medium">My Trips</h2>
 
-      <div className="flex items-start gap-6">
-        <div className="flex-1 rounded-xl bg-white p-5">
+      <div className="flex flex-col gap-6 md:flex-row md:items-start">
+        <div className="flex-1 rounded-xl bg-white p-4 md:p-5">
           {trips.length === 0 ? (
             <p className="py-8 text-center text-gray-400">No trips yet</p>
           ) : (
-            <div className="grid grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
               {trips.map((trip) => (
                 <div
                   key={trip.id}
@@ -114,9 +128,15 @@ const DashboardPage = () => {
                     {trip.cover_image_url && (
                       <img src={trip.cover_image_url} alt="" className="h-full w-full rounded-t-xl object-cover" />
                     )}
-                    <span className={`absolute top-3 right-3 rounded border bg-white px-3 py-0.5 text-xs font-medium ${statusStyle(getTripStatus(trip))}`}>
+                    <span className={`absolute top-3 left-3 rounded border bg-white px-3 py-0.5 text-xs font-medium ${statusStyle(getTripStatus(trip))}`}>
                       {getTripStatus(trip)}
                     </span>
+                    <button
+                      onClick={(e) => handleDeleteTrip(trip.id, e)}
+                      className="absolute top-3 right-3 rounded-full bg-white/80 px-2 py-0.5 text-xs text-gray-400 transition hover:bg-red-50 hover:text-red-500"
+                    >
+                      ✕
+                    </button>
                   </div>
 
                   <div className="p-4">
@@ -140,27 +160,7 @@ const DashboardPage = () => {
           )}
         </div>
 
-        <div className="w-72 space-y-6">
-          <div className="rounded-xl border border-gray-200 bg-white p-5">
-            <h3 className="mb-4 text-base font-bold text-gray-900">Notifications</h3>
-            {notifications.length === 0 ? (
-              <p className="text-sm text-gray-400">No notifications</p>
-            ) : (
-              <div className="space-y-3">
-                {notifications.map((notif, index) => (
-                  <div key={index} className="flex items-center gap-3 rounded-xl bg-[#eeeef8] px-4 py-3">
-                    <div className="h-10 w-10 rounded-full bg-gray-300" />
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-gray-900">{notif.name}</p>
-                      <p className="text-xs text-gray-500">{notif.text}</p>
-                    </div>
-                    <button className="text-sm text-gray-400 hover:text-gray-700">✕</button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
+        <div className="w-full space-y-6 md:w-72">
           <div className="rounded-xl border border-gray-200 bg-white p-5">
             <h3 className="mb-4 text-base font-bold text-gray-900">Soon to do</h3>
             {deadlines.length === 0 ? (
@@ -169,13 +169,19 @@ const DashboardPage = () => {
               <div className="space-y-3">
                 {deadlines.map((task, index) => (
                   <div key={index} className="rounded-xl border border-gray-200 p-4">
-                    <p className="mb-3 font-semibold text-gray-900">{task.title}</p>
+                    <p className="mb-1 font-semibold text-gray-900">{task.title}</p>
+                    <p className="mb-3 text-xs text-gray-400">{trips.find((t) => t.id === task.trip_id)?.title || ''}</p>
                     <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-gray-300" />
-                      <span className="text-xs text-gray-600">{task.name}</span>
+                      <span className={`rounded border bg-white px-3 py-0.5 text-xs font-medium ${
+                        task.status === 'in_progress'
+                          ? 'border-[#F0C040] text-[#F0C040]'
+                          : 'border-[#3d3d5e] text-[#3d3d5e]'
+                      }`}>
+                        {task.status === 'in_progress' ? 'In Progress' : 'To Do'}
+                      </span>
                       <span className="ml-auto flex items-center gap-1 text-xs text-gray-400">
                         <img src="/icons/date.svg" alt="" className="h-4 w-4 opacity-50" />
-                        {task.date}
+                        {task.due_date ? new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'No date'}
                       </span>
                     </div>
                   </div>

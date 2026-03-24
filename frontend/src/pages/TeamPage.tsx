@@ -95,7 +95,7 @@ const TeamPage = () => {
 
   return (
     <div className="flex min-h-[calc(100vh-57px)]">
-      <aside className="w-60 border-r border-gray-200 bg-white px-4 py-6">
+      <aside className="hidden w-60 border-r border-gray-200 bg-white px-4 py-6 md:block">
         <NavLink to="/dashboard" className="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900">
           &lt; Back
         </NavLink>
@@ -120,10 +120,10 @@ const TeamPage = () => {
         </nav>
       </aside>
 
-      <main className="relative flex-1 bg-[#f9f9fb] p-8">
-        <div className="mb-2 flex items-center justify-between">
+      <main className="relative flex-1 bg-[#f9f9fb] p-4 md:p-8">
+        <div className="mb-4 flex flex-col items-center md:mb-2 md:flex-row md:justify-between">
           <div className="flex items-center gap-3">
-            <img src="/vehicles/hot-air-balloon.svg" alt="" className="h-[100px] w-auto opacity-20 grayscale" />
+            <img src="/vehicles/hot-air-balloon.svg" alt="" className="hidden h-[100px] w-auto opacity-20 grayscale md:block" />
             {isEditingTitle ? (
               <input
                 type="text"
@@ -132,43 +132,40 @@ const TeamPage = () => {
                 onBlur={handleTitleSave}
                 onKeyDown={handleTitleKeyDown}
                 autoFocus
-                className="rounded-lg border border-[#3d3d5e] px-3 py-1 text-2xl font-bold text-gray-900 outline-none"
+                className="rounded-lg border border-[#3d3d5e] px-3 py-1 text-xl font-bold text-gray-900 outline-none md:text-2xl"
               />
             ) : (
-              <h1 className="text-2xl font-bold text-gray-900">
-                {trip?.title || 'Trip Name'}
+              <h1 className="text-xl font-bold text-gray-900 md:text-2xl">
+                {trip?.title || 'Trip Name'}<span className="md:hidden"> Team</span>
               </h1>
             )}
           </div>
+        </div>
+
+        <div className="mb-4 flex flex-wrap items-center justify-center gap-2 border-b border-gray-200 pb-4 md:mb-6 md:justify-end md:gap-3">
           <button
             onClick={() => setIsEditingTitle(true)}
             className="rounded-full bg-[#3d3d5e] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#2f2f4a]"
           >
             Edit Trip Name
           </button>
+          <button className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            ☰ Sort by
+          </button>
+          <button className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            Filter
+          </button>
         </div>
 
-        <div className="mb-6 flex items-center justify-between border-b border-gray-200 pb-4">
-          <div />
-          <div className="flex items-center gap-3">
-            <button className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-              ☰ Sort by
-            </button>
-            <button className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-              Filter
-            </button>
-          </div>
-        </div>
-
-        <div className="mb-8 flex gap-4">
-          <div className="flex flex-1 items-center justify-between rounded-xl bg-[#3d3d5e] px-6 py-3 font-semibold text-white">
+        <div className="mb-6 flex flex-col gap-3 md:mb-8 md:flex-row md:gap-4">
+          <div className="flex flex-1 items-center justify-between rounded-xl bg-[#3d3d5e] px-4 py-3 text-sm font-semibold text-white md:px-6 md:text-base">
             <span>Travel Date</span>
             <span className="flex items-center gap-2">
               <img src="/icons/date.svg" alt="" className="h-5 w-5 brightness-0 invert" />
               {trip ? formatDate(trip.start_date, trip.end_date) : 'Loading...'}
             </span>
           </div>
-          <div className="flex flex-1 cursor-pointer items-center justify-between rounded-xl bg-[#3d3d5e] px-6 py-3 font-semibold text-white transition hover:bg-[#2f2f4a]">
+          <div className="flex flex-1 cursor-pointer items-center justify-between rounded-xl bg-[#3d3d5e] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#2f2f4a] md:px-6 md:text-base">
             <span>Copy Invitation Note</span>
             <img src="/icons/copy.svg" alt="" className="h-5 w-5" />
           </div>
@@ -267,8 +264,25 @@ const TeamPage = () => {
             )}
           </div>
         </div>
-        <img src="/vehicles/Union.svg" alt="" className="fixed bottom-10 right-10 h-40 w-auto opacity-10 grayscale pointer-events-none" />
+        <img src="/vehicles/Union.svg" alt="" className="fixed bottom-10 right-10 hidden h-40 w-auto opacity-10 grayscale pointer-events-none md:block" />
       </main>
+
+      <nav className="fixed bottom-0 left-0 z-50 flex w-full border-t border-gray-200 bg-white md:hidden">
+        {sidebarItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={`/travel/${tripId}/${item.path}`}
+            className={({ isActive }) =>
+              `flex flex-1 flex-col items-center gap-1 py-3 text-xs font-medium transition ${
+                isActive ? 'text-[#3d3d5e]' : 'text-gray-400'
+              }`
+            }
+          >
+            <img src={item.icon} alt={item.label} className="h-5 w-5" />
+            {item.label}
+          </NavLink>
+        ))}
+      </nav>
     </div>
   );
 };

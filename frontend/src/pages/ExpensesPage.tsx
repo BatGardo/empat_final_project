@@ -62,7 +62,7 @@ const ExpensesPage = () => {
 
   return (
     <div className="flex min-h-[calc(100vh-57px)]">
-      <aside className="w-60 border-r border-gray-200 bg-white px-4 py-6">
+      <aside className="hidden w-60 border-r border-gray-200 bg-white px-4 py-6 md:block">
         <NavLink to="/dashboard" className="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900">
           &lt; Back
         </NavLink>
@@ -87,40 +87,39 @@ const ExpensesPage = () => {
         </nav>
       </aside>
 
-      <main className="relative flex-1 bg-[#f9f9fb] p-8">
-        <div className="mb-6 flex items-center gap-3">
-          <img src="/vehicles/hot-air-balloon.svg" alt="" className="h-[100px] w-auto opacity-20 grayscale" />
-          <h1 className="text-2xl font-bold text-gray-900">Expenses</h1>
+      <main className="relative flex-1 bg-[#f9f9fb] p-4 pb-20 md:p-8">
+        <div className="mb-4 flex flex-col items-center md:mb-6 md:flex-row md:gap-3">
+          <img src="/vehicles/hot-air-balloon.svg" alt="" className="hidden h-[100px] w-auto opacity-20 grayscale md:block" />
+          <h1 className="text-xl font-bold text-gray-900 md:text-2xl">
+            <span className="md:hidden">{trip?.title} </span>Expenses
+          </h1>
         </div>
 
-        <div className="mb-6 flex items-center justify-between border-b border-gray-200 pb-4">
-          <div />
-          <div className="flex items-center gap-3">
-            <button className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-              ☰ Sort by
-            </button>
-            <button className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-              Filter
-            </button>
-          </div>
+        <div className="mb-4 flex flex-wrap items-center justify-center gap-2 border-b border-gray-200 pb-4 md:mb-6 md:justify-end md:gap-3">
+          <button className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            ☰ Sort by
+          </button>
+          <button className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            Filter
+          </button>
         </div>
 
-        <div className="mb-6 flex gap-4">
-          <div className="flex flex-1 items-center justify-between rounded-xl bg-[#3d3d5e] px-6 py-3 font-semibold text-white">
+        <div className="mb-6 flex flex-col gap-3 md:flex-row md:gap-4">
+          <div className="flex flex-1 items-center justify-between rounded-xl bg-[#3d3d5e] px-4 py-3 text-sm font-semibold text-white md:px-6 md:text-base">
             <span>Global Amount</span>
             <span>{globalAmount.toFixed(2)}</span>
           </div>
           <div
             onClick={() => setShowForm(true)}
-            className="flex flex-1 cursor-pointer items-center justify-between rounded-xl bg-[#3d3d5e] px-6 py-3 font-semibold text-white transition hover:bg-[#2f2f4a]"
+            className="flex flex-1 cursor-pointer items-center justify-between rounded-xl bg-[#3d3d5e] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#2f2f4a] md:px-6 md:text-base"
           >
             <span>Add new expense</span>
             <span className="text-xl">+</span>
           </div>
         </div>
 
-        <div className="flex gap-6">
-          <div className="flex h-64 w-64 items-center justify-center rounded-xl bg-white p-4 shadow-sm">
+        <div className="flex flex-col gap-6 md:flex-row">
+          <div className="mx-auto flex h-64 w-64 items-center justify-center rounded-xl bg-white p-4 shadow-sm">
             {chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -225,8 +224,25 @@ const ExpensesPage = () => {
           </div>
         )}
 
-        <img src="/vehicles/Union.svg" alt="" className="fixed bottom-10 right-10 h-40 w-auto opacity-10 grayscale pointer-events-none" />
+        <img src="/vehicles/Union.svg" alt="" className="fixed bottom-10 right-10 hidden h-40 w-auto opacity-10 grayscale pointer-events-none md:block" />
       </main>
+
+      <nav className="fixed bottom-0 left-0 z-50 flex w-full border-t border-gray-200 bg-white md:hidden">
+        {sidebarItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={`/travel/${tripId}/${item.path}`}
+            className={({ isActive }) =>
+              `flex flex-1 flex-col items-center gap-1 py-3 text-xs font-medium transition ${
+                isActive ? 'text-[#3d3d5e]' : 'text-gray-400'
+              }`
+            }
+          >
+            <img src={item.icon} alt={item.label} className="h-5 w-5" />
+            {item.label}
+          </NavLink>
+        ))}
+      </nav>
     </div>
   );
 };
