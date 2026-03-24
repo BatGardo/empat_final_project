@@ -29,18 +29,18 @@ const Layout = () => {
           </NavLink>
 
           <nav className="hidden items-center gap-6 md:flex">
-            <NavLink to="/dashboard" className="text-sm font-medium text-gray-700 transition hover:text-gray-900">
+            <NavLink
+              to="/dashboard"
+              className="text-sm font-medium text-gray-700 transition hover:text-gray-900"
+            >
               Dashboard
             </NavLink>
-            <NavLink to="/profile" className="text-sm font-medium text-gray-700 transition hover:text-gray-900">
+            <NavLink
+              to="/profile"
+              className="text-sm font-medium text-gray-700 transition hover:text-gray-900"
+            >
               Profile
             </NavLink>
-            <button
-              onClick={handleLogout}
-              className="rounded-full bg-[#3d3d5e] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#2f2f4a]"
-            >
-              Log out
-            </button>
           </nav>
 
           <button
@@ -68,12 +68,6 @@ const Layout = () => {
               className="flex h-12 w-full items-center justify-between rounded-lg bg-gray-50 px-4 text-sm font-semibold text-gray-900 hover:bg-gray-100"
             >
               Profile
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex h-12 w-full items-center justify-center rounded-lg bg-[#3d3d5e] text-sm font-semibold text-white transition hover:bg-[#2f2f4a]"
-            >
-              Log out
             </button>
           </div>
         )}

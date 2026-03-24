@@ -15,6 +15,7 @@ const RegisterPage = () => {
     formState: { errors },
   } = useForm<RegisterInterface>({
     resolver: yupResolver(registerSchema),
+    mode: 'onTouched',
   });
 
   const { handleRegister, isRegisterLoading } = useAuth();
