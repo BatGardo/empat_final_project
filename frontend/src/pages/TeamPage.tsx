@@ -97,10 +97,15 @@ const TeamPage = () => {
   return (
     <div className="flex min-h-[calc(100vh-57px)]">
       <aside className="hidden w-60 border-r border-gray-200 bg-white px-4 py-6 md:block">
-        <NavLink to="/dashboard" className="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900">
+        <NavLink
+          to="/dashboard"
+          className="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900"
+        >
           &lt; Back
         </NavLink>
-        <h2 className="mb-6 text-xl font-bold text-gray-900">{trip?.title || 'Travel Name'}</h2>
+        <h2 className="mb-6 text-xl font-bold text-gray-900">
+          {trip?.title || 'Travel Name'}
+        </h2>
         <nav className="flex flex-col gap-1">
           {sidebarItems.map((item) => (
             <NavLink
@@ -124,7 +129,11 @@ const TeamPage = () => {
       <main className="relative flex-1 bg-[#f9f9fb] p-4 md:p-8">
         <div className="mb-4 flex flex-col items-center md:mb-2 md:flex-row md:justify-between">
           <div className="flex items-center gap-3">
-            <img src="/vehicles/hot-air-balloon.svg" alt="" className="hidden h-[100px] w-auto opacity-20 grayscale md:block" />
+            <img
+              src="/vehicles/hot-air-balloon.svg"
+              alt=""
+              className="hidden h-[100px] w-auto opacity-20 grayscale md:block"
+            />
             {isEditingTitle ? (
               <input
                 type="text"
@@ -137,7 +146,8 @@ const TeamPage = () => {
               />
             ) : (
               <h1 className="text-xl font-bold text-gray-900 md:text-2xl">
-                {trip?.title || 'Trip Name'}<span className="md:hidden"> Team</span>
+                {trip?.title || 'Trip Name'}
+                <span className="md:hidden"> Team</span>
               </h1>
             )}
           </div>
@@ -150,19 +160,17 @@ const TeamPage = () => {
           >
             Edit Trip Name
           </button>
-          <button className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-            ☰ Sort by
-          </button>
-          <button className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-            Filter
-          </button>
         </div>
 
         <div className="mb-6 flex flex-col gap-3 md:mb-8 md:flex-row md:gap-4">
           <div className="flex flex-1 items-center justify-between rounded-xl bg-[#3d3d5e] px-4 py-3 text-sm font-semibold text-white md:px-6 md:text-base">
             <span>Travel Date</span>
             <span className="flex items-center gap-2">
-              <img src="/icons/date.svg" alt="" className="h-5 w-5 brightness-0 invert" />
+              <img
+                src="/icons/date.svg"
+                alt=""
+                className="h-5 w-5 brightness-0 invert"
+              />
               {trip ? formatDate(trip.start_date, trip.end_date) : 'Loading...'}
             </span>
           </div>
@@ -191,7 +199,9 @@ const TeamPage = () => {
                   <span className="text-sm text-gray-400">You</span>
                 ) : (
                   <button
-                    onClick={() => setMembers(members.filter((m) => m.id !== member.id))}
+                    onClick={() =>
+                      setMembers(members.filter((m) => m.id !== member.id))
+                    }
                     className="text-sm text-gray-400 transition hover:text-gray-700"
                   >
                     ✕

@@ -39,24 +39,30 @@ const ExpensesPage = () => {
       const updated = await getTripExpenses(tripId);
       setExpenses(updated);
       setShowForm(false);
-      setNewExpense({ title: '', total_amount: 0, currency: 'USD', paid_by: 1, splits: [1] });
+      setNewExpense({
+        title: '',
+        total_amount: 0,
+        currency: 'USD',
+        paid_by: 1,
+        splits: [1],
+      });
     } catch (err) {
       console.error(err);
     }
   };
-
   const handleDeleteExpense = async (expenseId: string) => {
-    if (!tripId) return;
-    try {
-      await deleteExpense(tripId, expenseId);
-      setExpenses(expenses.filter((e) => e.id !== expenseId));
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  if (!tripId) return;
+  try {
+    await deleteExpense(tripId, expenseId);
+    setExpenses(expenses.filter((e) => e.id !== expenseId));
+  } catch (err) {
+    console.error(err);
+  }
+};
 
-  const globalAmount = expenses.reduce((sum, e) => sum + parseFloat(e.total_amount), 0);
-  const budgetRemaining = trip ? parseFloat(trip.budget_amount) - globalAmount : 0;
+const globalAmount = expenses.reduce((sum, e) => sum + parseFloat(e.total_amount), 0);
+const budgetRemaining = trip ? parseFloat(trip.budget_amount) - globalAmount : 0;
+
 
   const chartData = expenses.map((e) => ({
     name: e.title,
@@ -74,10 +80,15 @@ const ExpensesPage = () => {
   return (
     <div className="flex min-h-[calc(100vh-57px)]">
       <aside className="hidden w-60 border-r border-gray-200 bg-white px-4 py-6 md:block">
-        <NavLink to="/dashboard" className="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900">
+        <NavLink
+          to="/dashboard"
+          className="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900"
+        >
           &lt; Back
         </NavLink>
-        <h2 className="mb-6 text-xl font-bold text-gray-900">{trip?.title || 'Travel Name'}</h2>
+        <h2 className="mb-6 text-xl font-bold text-gray-900">
+          {trip?.title || 'Travel Name'}
+        </h2>
         <nav className="flex flex-col gap-1">
           {sidebarItems.map((item) => (
             <NavLink
@@ -100,19 +111,14 @@ const ExpensesPage = () => {
 
       <main className="relative flex-1 bg-[#f9f9fb] p-4 pb-20 md:p-8">
         <div className="mb-4 flex flex-col items-center md:mb-6 md:flex-row md:gap-3">
-          <img src="/vehicles/hot-air-balloon.svg" alt="" className="hidden h-[100px] w-auto opacity-20 grayscale md:block" />
+          <img
+            src="/vehicles/hot-air-balloon.svg"
+            alt=""
+            className="hidden h-[100px] w-auto opacity-20 grayscale md:block"
+          />
           <h1 className="text-xl font-bold text-gray-900 md:text-2xl">
             <span className="md:hidden">{trip?.title} </span>Expenses
           </h1>
-        </div>
-
-        <div className="mb-4 flex flex-wrap items-center justify-center gap-2 border-b border-gray-200 pb-4 md:mb-6 md:justify-end md:gap-3">
-          <button className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-            ☰ Sort by
-          </button>
-          <button className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-            Filter
-          </button>
         </div>
 
         <div className="mb-6 flex flex-col gap-3 md:flex-row md:gap-4">
@@ -148,7 +154,10 @@ const ExpensesPage = () => {
                     stroke="none"
                   >
                     {chartData.map((_entry, index) => (
-                      <Cell key={index} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                      <Cell
+                        key={index}
+                        fill={CHART_COLORS[index % CHART_COLORS.length]}
+                      />
                     ))}
                   </Pie>
                 </PieChart>
@@ -170,7 +179,7 @@ const ExpensesPage = () => {
                       onClick={() => handleDeleteExpense(expense.id)}
                       className="text-xs text-gray-400 transition hover:text-red-500"
                     >
-                      ✕
+                      ×
                     </button>
                   </div>
                   <div
@@ -186,6 +195,7 @@ const ExpensesPage = () => {
                       </span>
                     </div>
                   </div>
+                  </div>
                 </div>
               ))
             )}
@@ -193,16 +203,28 @@ const ExpensesPage = () => {
         </div>
 
         {showForm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowForm(false)}>
-            <div className="w-[400px] rounded-2xl bg-white p-8" onClick={(e) => e.stopPropagation()}>
-              <h2 className="mb-6 text-xl font-bold text-gray-900">Add Expense</h2>
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+            onClick={() => setShowForm(false)}
+          >
+            <div
+              className="w-[400px] rounded-2xl bg-white p-8"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="mb-6 text-xl font-bold text-gray-900">
+                Add Expense
+              </h2>
               <div className="space-y-4">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Title *</label>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">
+                    Title *
+                  </label>
                   <input
                     type="text"
                     value={newExpense.title}
-                    onChange={(e) => setNewExpense({ ...newExpense, title: e.target.value })}
+                    onChange={(e) =>
+                      setNewExpense({ ...newExpense, title: e.target.value })
+                    }
                     placeholder="Dinner, Hotel..."
                     autoFocus
                     className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none focus:border-[#3d3d5e]"
@@ -210,20 +232,34 @@ const ExpensesPage = () => {
                 </div>
                 <div className="flex gap-4">
                   <div className="flex-1">
-                    <label className="mb-1 block text-sm font-medium text-gray-700">Amount *</label>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">
+                      Amount *
+                    </label>
                     <input
                       type="number"
                       value={newExpense.total_amount || ''}
-                      onChange={(e) => setNewExpense({ ...newExpense, total_amount: Number(e.target.value) })}
+                      onChange={(e) =>
+                        setNewExpense({
+                          ...newExpense,
+                          total_amount: Number(e.target.value),
+                        })
+                      }
                       placeholder="100"
                       className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none focus:border-[#3d3d5e]"
                     />
                   </div>
                   <div className="flex-1">
-                    <label className="mb-1 block text-sm font-medium text-gray-700">Currency</label>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">
+                      Currency
+                    </label>
                     <select
                       value={newExpense.currency}
-                      onChange={(e) => setNewExpense({ ...newExpense, currency: e.target.value })}
+                      onChange={(e) =>
+                        setNewExpense({
+                          ...newExpense,
+                          currency: e.target.value,
+                        })
+                      }
                       className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none focus:border-[#3d3d5e]"
                     >
                       <option value="USD">USD</option>
@@ -252,7 +288,11 @@ const ExpensesPage = () => {
           </div>
         )}
 
-        <img src="/vehicles/Union.svg" alt="" className="fixed bottom-10 right-10 hidden h-40 w-auto opacity-10 grayscale pointer-events-none md:block" />
+        <img
+          src="/vehicles/Union.svg"
+          alt=""
+          className="pointer-events-none fixed right-10 bottom-10 hidden h-40 w-auto opacity-10 grayscale md:block"
+        />
       </main>
 
       <nav className="fixed bottom-0 left-0 z-50 flex w-full border-t border-gray-200 bg-white md:hidden">
